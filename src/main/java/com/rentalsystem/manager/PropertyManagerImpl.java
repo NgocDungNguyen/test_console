@@ -3,9 +3,6 @@ package com.rentalsystem.manager;
 import com.rentalsystem.model.*;
 import com.rentalsystem.util.FileHandler;
 
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -17,18 +14,22 @@ public class PropertyManagerImpl implements PropertyManager {
     private OwnerManager ownerManager;
     private RentalManager rentalManager;
 
-    public PropertyManagerImpl(FileHandler fileHandler, HostManager hostManager, TenantManager tenantManager, OwnerManager ownerManager, RentalManager rentalManager) {
+    public PropertyManagerImpl(FileHandler fileHandler) {
         this.fileHandler = fileHandler;
+        this.properties = new HashMap<>();
+    }
+
+    public void setDependencies(HostManager hostManager, TenantManager tenantManager, OwnerManager ownerManager, RentalManager rentalManager) {
         this.hostManager = hostManager;
         this.tenantManager = tenantManager;
         this.ownerManager = ownerManager;
         this.rentalManager = rentalManager;
-
-        this.properties = new HashMap<>();
     }
 
     public void load() {
-        // fileHandler will modify the existing this.properties and call this.properties.add() on each saved line;
+        if (hostManager == null || tenantManager == null || ownerManager == null || rentalManager == null) {
+            throw new IllegalStateException("Dependencies not set for PropertyManager");
+        }
         fileHandler.loadProperties();
 
         for (Property property : getAll()) {
@@ -42,7 +43,6 @@ public class PropertyManagerImpl implements PropertyManager {
             }
 
             if (!property.getHosts().isEmpty()) {
-
                 property.getHosts().forEach(host -> {
                     Host realHost = hostManager.get(host.getId());
                     realHost.addManagedProperty(property);
@@ -50,7 +50,6 @@ public class PropertyManagerImpl implements PropertyManager {
             }
 
             if (!property.getTenants().isEmpty()) {
-
                 property.getTenants().forEach(t -> {
                     Tenant rt = tenantManager.get(t.getId());
                     rt.addRentedProperty(property);
@@ -219,9 +218,7 @@ public class PropertyManagerImpl implements PropertyManager {
         List<String[]> propertyHostsLines = new ArrayList<>();
         List<String[]> propertyTenantLines = new ArrayList<>();
 
-
         for (Property property : getSorted("id")) {
-
             propertyLines.add(saveProperty(property));
 
             for (Host host : property.getHosts()) {
@@ -232,7 +229,6 @@ public class PropertyManagerImpl implements PropertyManager {
                 propertyTenantLines.add(savePropertyPerson(property, tenant));
             }
         }
-
 
         fileHandler.saveProperties(propertyLines);
         fileHandler.savePropertiesHosts(propertyHostsLines);
@@ -246,7 +242,6 @@ public class PropertyManagerImpl implements PropertyManager {
         String address = parts[2];
         double price = Double.parseDouble(parts[3]);
         PropertyStatus propertyStatus = PropertyStatus.valueOf(parts[4]);
-        // 5: ownerId
         String ownerId = parts[5];
 
         String numberOfRoom = parts[6];
@@ -276,7 +271,7 @@ public class PropertyManagerImpl implements PropertyManager {
                 );
                 break;
             default:
-                throw new RuntimeException("Property of type " + propertyType + "does not exist");
+                throw new RuntimeException("Property of type " + propertyType + " does not exist");
         }
 
         return property;

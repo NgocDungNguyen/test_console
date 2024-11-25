@@ -12,23 +12,28 @@ import static com.rentalsystem.util.FileHandler.DATE_FORMAT;
 public class RentalManagerImpl implements RentalManager {
     private final Map<String, RentalAgreement> rentalAgreements;
     private final FileHandler fileHandler;
-    private final TenantManager tenantManager;
-    private final PropertyManager propertyManager;
-    private final HostManager hostManager;
-    private final OwnerManager ownerManager;
+    private TenantManager tenantManager;
+    private PropertyManager propertyManager;
+    private HostManager hostManager;
+    private OwnerManager ownerManager;
 
-    public RentalManagerImpl(FileHandler fileHandler, TenantManager tenantManager, PropertyManager propertyManager, HostManager hostManager, OwnerManager ownerManager) {
+    public RentalManagerImpl(FileHandler fileHandler) {
         this.fileHandler = fileHandler;
+        this.rentalAgreements = new HashMap<>();
+    }
+
+    public void setDependencies(TenantManager tenantManager, PropertyManager propertyManager, HostManager hostManager, OwnerManager ownerManager) {
         this.tenantManager = tenantManager;
         this.propertyManager = propertyManager;
         this.hostManager = hostManager;
         this.ownerManager = ownerManager;
-        this.rentalAgreements = new HashMap<>();
     }
 
     public void load() {
+        if (tenantManager == null || propertyManager == null || hostManager == null || ownerManager == null) {
+            throw new IllegalStateException("Dependencies not set for RentalManager");
+        }
         fileHandler.loadRentalAgreements();
-
     }
 
     private void updateAgreementStatus(RentalAgreement agreement) {
@@ -41,7 +46,6 @@ public class RentalManagerImpl implements RentalManager {
             agreement.setStatus(RentalAgreement.Status.ACTIVE);
         }
     }
-
 
     @Override
     public void add(RentalAgreement agreement) {
@@ -66,7 +70,6 @@ public class RentalManagerImpl implements RentalManager {
             property.addTenant(subTenant);
             actualSubTenant.addRentalAgreement(agreement);
         }
-
     }
 
     @Override
@@ -301,7 +304,6 @@ public class RentalManagerImpl implements RentalManager {
 
     @Override
     public RentalAgreement fromString(String[] parts) {
-
         Property property = propertyManager.get(parts[1]);
         Tenant mainTenant = tenantManager.get(parts[2]);
         Owner owner = ownerManager.get(parts[3]);
@@ -322,6 +324,5 @@ public class RentalManagerImpl implements RentalManager {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
-
     }
 }

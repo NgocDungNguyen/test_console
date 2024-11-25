@@ -55,7 +55,7 @@ public class ConsoleUI {
     private PropertyManager propertyManager;
     private final LineReader reader;
     private final Terminal terminal;
-    private final FileHandler fileHandler;
+    private FileHandler fileHandler;
     private final TableFormatter tableFormatter;
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -126,14 +126,21 @@ public class ConsoleUI {
 
     private void initializeManagers() {
         System.out.print("Initializing system...");
+        this.fileHandler = new FileHandler(); // This is now allowed
         this.hostManager = new HostManagerImpl(fileHandler);
         this.tenantManager = new TenantManagerImpl(fileHandler);
         this.ownerManager = new OwnerManagerImpl(fileHandler);
-        this.propertyManager = new PropertyManagerImpl(fileHandler, hostManager, tenantManager, ownerManager, rentalManager);
-        this.rentalManager = new RentalManagerImpl(fileHandler, tenantManager, propertyManager, hostManager, ownerManager);
+        this.propertyManager = new PropertyManagerImpl(fileHandler);
+        this.rentalManager = new RentalManagerImpl(fileHandler);
+
+        // Set dependencies
+        ((PropertyManagerImpl)this.propertyManager).setDependencies(hostManager, tenantManager, ownerManager, rentalManager);
+        ((RentalManagerImpl)this.rentalManager).setDependencies(tenantManager, propertyManager, hostManager, ownerManager);
+
         System.out.println("Sync manager with file handler");
         this.fileHandler.syncManager(rentalManager, tenantManager, ownerManager, hostManager, propertyManager);
-        // load all after all have init
+
+        // Load data
         this.hostManager.load();
         this.tenantManager.load();
         this.ownerManager.load();
@@ -143,6 +150,7 @@ public class ConsoleUI {
 
         System.out.println("Done!");
     }
+
 
     public void start() {
         clearScreen();
