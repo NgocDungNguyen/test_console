@@ -33,7 +33,11 @@ public class RentalManagerImpl implements RentalManager {
         if (tenantManager == null || propertyManager == null || hostManager == null || ownerManager == null) {
             throw new IllegalStateException("Dependencies not set for RentalManager");
         }
-        fileHandler.loadRentalAgreements();
+        List<String[]> lines = fileHandler.readLines("rental_agreements.txt");
+        for (String[] parts : lines) {
+            RentalAgreement agreement = fromString(parts);
+            rentalAgreements.put(agreement.getAgreementId(), agreement);
+        }
     }
 
     private void updateAgreementStatus(RentalAgreement agreement) {
@@ -310,7 +314,7 @@ public class RentalManagerImpl implements RentalManager {
         Host host = hostManager.get(parts[4]);
 
         try {
-            return new RentalAgreement(
+            RentalAgreement agreement = new RentalAgreement(
                     parts[0],
                     property,
                     mainTenant,
@@ -321,6 +325,8 @@ public class RentalManagerImpl implements RentalManager {
                     Double.parseDouble(parts[7]),
                     RentalAgreement.RentalPeriod.valueOf(parts[8])
             );
+            agreement.setStatus(RentalAgreement.Status.valueOf(parts[9]));
+            return agreement;
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }

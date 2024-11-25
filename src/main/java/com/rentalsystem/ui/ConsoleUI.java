@@ -110,6 +110,19 @@ public class ConsoleUI {
                 ANSI_RESET);
     }
 
+    private static class LoaderSpinner {
+        private static final String[] SPINNER_FRAMES = {"|", "/", "-", "\\"};
+        private int currentFrame = 0;
+
+        public void spin() {
+            System.out.print("\r" + SPINNER_FRAMES[currentFrame]);
+            currentFrame = (currentFrame + 1) % SPINNER_FRAMES.length;
+        }
+
+        public void stop() {
+            System.out.print("\r");
+        }
+    }
 
     public ConsoleUI() throws IOException {
         terminal = TerminalBuilder.builder().system(true).build();
@@ -125,32 +138,58 @@ public class ConsoleUI {
     }
 
     private void initializeManagers() {
-        System.out.print("Initializing system...");
-        this.fileHandler = new FileHandler(); // This is now allowed
-        this.hostManager = new HostManagerImpl(fileHandler);
-        this.tenantManager = new TenantManagerImpl(fileHandler);
-        this.ownerManager = new OwnerManagerImpl(fileHandler);
-        this.propertyManager = new PropertyManagerImpl(fileHandler);
-        this.rentalManager = new RentalManagerImpl(fileHandler);
+        ProgressDisplay progressDisplay = new ProgressDisplay(terminal);
+        System.out.println("Initializing system...");
 
-        // Set dependencies
-        ((PropertyManagerImpl)this.propertyManager).setDependencies(hostManager, tenantManager, ownerManager, rentalManager);
-        ((RentalManagerImpl)this.rentalManager).setDependencies(tenantManager, propertyManager, hostManager, ownerManager);
+        String[] steps = {"Initializing managers", "Syncing managers", "Loading hosts", "Loading tenants", "Loading owners", "Loading properties", "Loading rental agreements", "Loading payments"};
+        int totalSteps = steps.length;
 
-        System.out.println("Sync manager with file handler");
-        this.fileHandler.syncManager(rentalManager, tenantManager, ownerManager, hostManager, propertyManager);
+        for (int i = 0; i < totalSteps; i++) {
+            progressDisplay.showProgress(steps[i], i + 1, totalSteps);
 
-        // Load data
-        this.hostManager.load();
-        this.tenantManager.load();
-        this.ownerManager.load();
-        this.propertyManager.load();
-        this.rentalManager.load();
-        this.tenantManager.loadPayments();
+            switch (i) {
+                case 0:
+                    this.fileHandler = new FileHandler();
+                    this.hostManager = new HostManagerImpl(fileHandler);
+                    this.tenantManager = new TenantManagerImpl(fileHandler);
+                    this.ownerManager = new OwnerManagerImpl(fileHandler);
+                    this.propertyManager = new PropertyManagerImpl(fileHandler);
+                    this.rentalManager = new RentalManagerImpl(fileHandler);
+                    break;
+                case 1:
+                    ((PropertyManagerImpl)this.propertyManager).setDependencies(hostManager, tenantManager, ownerManager, rentalManager);
+                    ((RentalManagerImpl)this.rentalManager).setDependencies(tenantManager, propertyManager, hostManager, ownerManager);
+                    this.fileHandler.syncManager(rentalManager, tenantManager, ownerManager, hostManager, propertyManager);
+                    break;
+                case 2:
+                    this.hostManager.load();
+                    break;
+                case 3:
+                    this.tenantManager.load();
+                    break;
+                case 4:
+                    this.ownerManager.load();
+                    break;
+                case 5:
+                    this.propertyManager.load();
+                    break;
+                case 6:
+                    this.rentalManager.load();
+                    break;
+                case 7:
+                    this.tenantManager.loadPayments();
+                    break;
+            }
 
-        System.out.println("Done!");
+            try {
+                Thread.sleep(100); // Reduced sleep time for faster initialization
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        System.out.println("\nSystem initialization complete!");
     }
-
 
     public void start() {
         clearScreen();
@@ -189,12 +228,30 @@ public class ConsoleUI {
     }
 
     private void handleSave() {
-        this.tenantManager.saveToFile();
-        this.propertyManager.saveToFile();
-        this.ownerManager.saveToFile();
-        this.rentalManager.saveToFile();
-        this.hostManager.saveToFile();
-        System.out.println("Saved data to files.");
+        LoaderSpinner spinner = new LoaderSpinner();
+        System.out.print("Saving data ");
+
+        Thread saveThread = new Thread(() -> {
+            this.tenantManager.saveToFile();
+            this.propertyManager.saveToFile();
+            this.ownerManager.saveToFile();
+            this.rentalManager.saveToFile();
+            this.hostManager.saveToFile();
+        });
+
+        saveThread.start();
+
+        while (saveThread.isAlive()) {
+            spinner.spin();
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        spinner.stop();
+        System.out.println("Data saved successfully.");
     }
 
     private void clearScreen() {
@@ -465,15 +522,19 @@ public class ConsoleUI {
 
     private void generatePropertyStatusReport() {
         List<Property> properties = propertyManager.getAll();
-        List<String> headers = Arrays.asList("Property ID", "Type", "Address", "Status", "Owner");
+        List<String> headers = Arrays.asList("Property ID", "Type", "Address", "Status", "Owner ID - Name", "Host ID - Name");
         List<List<String>> data = new ArrayList<>();
         for (Property property : properties) {
+            String hostInfo = property.getHosts().stream()
+                    .map(h -> h.getId() + " - " + h.getFullName())
+                    .collect(Collectors.joining(", "));
             data.add(Arrays.asList(
                     property.getPropertyId(),
                     property instanceof ResidentialProperty ? "Residential" : "Commercial",
                     property.getAddress(),
                     property.getStatus().toString(),
-                    property.getOwner().getFullName()
+                    property.getOwner().getId() + " - " + property.getOwner().getFullName(),
+                    hostInfo.isEmpty() ? "No Host" : hostInfo
             ));
         }
         tableFormatter.printDataTable(headers, data, TableFormatter.ANSI_CYAN);
@@ -515,11 +576,12 @@ public class ConsoleUI {
         List<String> headers = Arrays.asList("Host ID", "Name", "Managed Properties", "Active Agreements", "Total Rent");
         List<List<String>> data = new ArrayList<>();
         for (Host host : hosts) {
-            int managedProperties = host.getManagedProperties().size();
-            List<RentalAgreement> activeAgreements = host.getManagedAgreements().stream()
-                    .filter(a -> a.getStatus() == RentalAgreement.Status.ACTIVE)
+            List<RentalAgreement> activeAgreements = rentalManager.getAll().stream()
+                    .filter(a -> a.getHost().getId().equals(host.getId()) && a.getStatus() == RentalAgreement.Status.ACTIVE)
                     .collect(Collectors.toList());
-            int activeAgreementsCount = activeAgreements.size();
+            int managedProperties = (int) propertyManager.getAll().stream()
+                    .filter(p -> p.getHosts().stream().anyMatch(h -> h.getId().equals(host.getId())))
+                    .count();
             double totalRent = activeAgreements.stream()
                     .mapToDouble(RentalAgreement::getRentAmount)
                     .sum();
@@ -527,7 +589,7 @@ public class ConsoleUI {
                     host.getId(),
                     host.getFullName(),
                     String.valueOf(managedProperties),
-                    String.valueOf(activeAgreementsCount),
+                    String.valueOf(activeAgreements.size()),
                     String.format("%.2f", totalRent)
             ));
         }
@@ -1541,13 +1603,13 @@ public class ConsoleUI {
         System.out.println(TableFormatter.ANSI_GREEN + "Total Rental Income: $" + String.format("%.2f", totalIncome) + TableFormatter.ANSI_RESET);
 
         List<RentalAgreement> agreements = rentalManager.getAll();
-        List<String> headers = Arrays.asList("Agreement ID", "Property", "Tenant", "Rent Amount");
+        List<String> headers = Arrays.asList("Agreement ID", "Property", "Tenant ID - Name", "Rent Amount");
         List<List<String>> data = new ArrayList<>();
         for (RentalAgreement agreement : agreements) {
             data.add(Arrays.asList(
                     agreement.getAgreementId(),
                     agreement.getProperty().getPropertyId(),
-                    agreement.getMainTenant().getFullName(),
+                    agreement.getMainTenant().getId() + " - " + agreement.getMainTenant().getFullName(),
                     String.format("%.2f", agreement.getRentAmount())
             ));
         }
@@ -1578,8 +1640,8 @@ public class ConsoleUI {
         List<String> headers = Arrays.asList("ID", "Name", "Date of Birth", "Contact Info", "Active Agreements");
         List<List<String>> data = new ArrayList<>();
         for (Tenant tenant : tenants) {
-            int activeAgreements = (int) tenant.getRentalAgreements().stream()
-                    .filter(a -> a.getStatus() == RentalAgreement.Status.ACTIVE)
+            long activeAgreements = rentalManager.getAll().stream()
+                    .filter(a -> a.getMainTenant().getId().equals(tenant.getId()) && a.getStatus() == RentalAgreement.Status.ACTIVE)
                     .count();
             data.add(Arrays.asList(
                     tenant.getId(),
@@ -1626,11 +1688,11 @@ public class ConsoleUI {
         );
         List<List<String>> data = new ArrayList<>();
         for (Tenant tenant : tenants) {
-            String rentedProperty = "";
-            String rentalContractId = "";
-            String paymentAmount = "";
-            String paymentDate = "";
-            String paymentMethod = "";
+            String rentedProperty = "None";
+            String rentalContractId = "None";
+            String paymentAmount = "Not Paid Yet";
+            String paymentDate = "Not Paid Yet";
+            String paymentMethod = "Not Paid Yet";
             if (!tenant.getRentalAgreements().isEmpty()) {
                 RentalAgreement agreement = tenant.getRentalAgreements().get(0);
                 rentedProperty = agreement.getProperty().getPropertyId();
@@ -1661,7 +1723,7 @@ public class ConsoleUI {
 
     private void displayOwners(List<Owner> owners) {
         List<String> headers = Arrays.asList(
-                "Owner ID", "Name", "DOB", "Email", "Owned Properties"
+                "Owner ID", "Name", "DOB", "Email", "Owned Properties", "Managing Hosts"
         );
         List<List<String>> data = new ArrayList<>();
         for (Owner owner : owners) {
@@ -1669,12 +1731,22 @@ public class ConsoleUI {
                     .map(Property::getPropertyId)
                     .collect(Collectors.joining(", "));
 
+            String managingHosts = owner.getOwnedProperties().stream()
+                    .flatMap(property -> property.getHosts().stream())
+                    .distinct()
+                    .map(host -> host.getId() + " - " + host.getFullName())
+                    .collect(Collectors.joining(", "));
+
+            if (ownedProperties.isEmpty()) ownedProperties = "None";
+            if (managingHosts.isEmpty()) managingHosts = "None";
+
             data.add(Arrays.asList(
                     owner.getId(),
                     owner.getFullName(),
                     owner.getDateOfBirth(),
                     owner.getContactInformation(),
-                    ownedProperties
+                    ownedProperties,
+                    managingHosts
             ));
         }
         tableFormatter.printDataTable(headers, data, TableFormatter.ANSI_CYAN);
@@ -1682,19 +1754,29 @@ public class ConsoleUI {
 
     private void displayHosts(List<Host> hosts) {
         List<String> headers = Arrays.asList(
-                "Host ID", "Name", "DOB", "Email", "Managed Properties"
+                "Host ID", "Name", "DOB", "Email", "Managed Properties", "Property Owners"
         );
         List<List<String>> data = new ArrayList<>();
         for (Host host : hosts) {
             String managedProperties = host.getManagedProperties().stream()
                     .map(Property::getPropertyId)
                     .collect(Collectors.joining(", "));
+
+            String propertyOwners = host.getManagedProperties().stream()
+                    .map(property -> property.getOwner().getId() + " - " + property.getOwner().getFullName())
+                    .distinct()
+                    .collect(Collectors.joining(", "));
+
+            if (managedProperties.isEmpty()) managedProperties = "None";
+            if (propertyOwners.isEmpty()) propertyOwners = "None";
+
             data.add(Arrays.asList(
                     host.getId(),
                     host.getFullName(),
                     host.getDateOfBirth(),
                     host.getContactInformation(),
-                    managedProperties
+                    managedProperties,
+                    propertyOwners
             ));
         }
         tableFormatter.printDataTable(headers, data, TableFormatter.ANSI_CYAN);

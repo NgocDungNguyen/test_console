@@ -189,6 +189,9 @@ public class FileHandler {
     }
 
     public void loadHosts() {
+        if (hostManager == null) {
+            throw new IllegalStateException("HostManager is not initialized");
+        }
         for (String[] parts : readLines("hosts.txt")) {
             hostManager.add(hostManager.fromString(parts));
         }

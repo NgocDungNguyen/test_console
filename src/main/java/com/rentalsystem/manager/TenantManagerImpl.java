@@ -132,8 +132,9 @@ public class TenantManagerImpl implements TenantManager {
     public void loadPayments() {
         for (Payment p : fileHandler.loadPayments()) {
             Tenant tenant = tenants.get(p.getTenant().getId());
-            tenant.addPayment(p);
-            System.out.println("Tenant " + tenant.getId() + " payment " + p.getPaymentId() + " added");
+            if (tenant != null) {
+                tenant.addPayment(p);
+            }
         }
     }
 
