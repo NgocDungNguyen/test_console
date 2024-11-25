@@ -6,6 +6,10 @@ import com.rentalsystem.util.FileHandler;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the PropertyManager interface.
+ * Manages Property entities in the system.
+ */
 public class PropertyManagerImpl implements PropertyManager {
     private Map<String, Property> properties;
     private FileHandler fileHandler;
@@ -14,11 +18,22 @@ public class PropertyManagerImpl implements PropertyManager {
     private OwnerManager ownerManager;
     private RentalManager rentalManager;
 
+    /**
+     * Constructs a new PropertyManagerImpl.
+     * @param fileHandler The FileHandler to use for data persistence
+     */
     public PropertyManagerImpl(FileHandler fileHandler) {
         this.fileHandler = fileHandler;
         this.properties = new HashMap<>();
     }
 
+    /**
+     * Sets the dependencies for this PropertyManager.
+     * @param hostManager The HostManager to use
+     * @param tenantManager The TenantManager to use
+     * @param ownerManager The OwnerManager to use
+     * @param rentalManager The RentalManager to use
+     */
     public void setDependencies(HostManager hostManager, TenantManager tenantManager, OwnerManager ownerManager, RentalManager rentalManager) {
         this.hostManager = hostManager;
         this.tenantManager = tenantManager;
@@ -26,6 +41,9 @@ public class PropertyManagerImpl implements PropertyManager {
         this.rentalManager = rentalManager;
     }
 
+    /**
+     * Loads properties from file and initializes their relationships.
+     */
     public void load() {
         if (hostManager == null || tenantManager == null || ownerManager == null || rentalManager == null) {
             throw new IllegalStateException("Dependencies not set for PropertyManager");
@@ -170,6 +188,11 @@ public class PropertyManagerImpl implements PropertyManager {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Converts a Property object to a string array for file saving.
+     * @param property The Property to convert
+     * @return A string array representation of the Property
+     */
     private String[] saveProperty(Property property) {
         List<String> propertyData = new ArrayList<>(Arrays.asList(
                 property.getPropertyId(),
@@ -206,6 +229,12 @@ public class PropertyManagerImpl implements PropertyManager {
         return propertyData.toArray(new String[0]);
     }
 
+    /**
+     * Converts a Property and Person object to a string array for file saving.
+     * @param property The Property
+     * @param host The Person (Host or Tenant)
+     * @return A string array representation of the Property-Person relationship
+     */
     private String[] savePropertyPerson(Property property, Person host) {
         return new String[]{
                 property.getPropertyId(),
@@ -213,6 +242,7 @@ public class PropertyManagerImpl implements PropertyManager {
         };
     }
 
+    @Override
     public void saveToFile() {
         List<String[]> propertyLines = new ArrayList<>();
         List<String[]> propertyHostsLines = new ArrayList<>();

@@ -16,15 +16,26 @@ import com.rentalsystem.util.InputValidator;
 import static com.rentalsystem.util.FileHandler.DATE_FORMAT;
 import static com.rentalsystem.util.InputValidator.isEmailTaken;
 
+/**
+ * Implementation of the OwnerManager interface.
+ * Manages Owner entities in the system.
+ */
 public class OwnerManagerImpl implements OwnerManager {
     private final Map<String, Owner> owners;
     private final FileHandler fileHandler;
 
+    /**
+     * Constructs a new OwnerManagerImpl.
+     * @param fileHandler The FileHandler to use for data persistence
+     */
     public OwnerManagerImpl(FileHandler fileHandler) {
         this.fileHandler = fileHandler;
         this.owners = new HashMap<>();
     }
 
+    /**
+     * Loads owners from file into the system.
+     */
     public void load() {
         fileHandler.loadOwners();
     }
@@ -63,14 +74,17 @@ public class OwnerManagerImpl implements OwnerManager {
         owners.remove(ownerId);
     }
 
+    @Override
     public Owner get(String ownerId) {
         return owners.get(ownerId);
     }
 
+    @Override
     public List<Owner> getAll() {
         return new ArrayList<>(owners.values());
     }
 
+    @Override
     public List<Owner> getSorted(String sortBy) {
         List<Owner> sortedList = getAll();
         switch (sortBy.toLowerCase()) {
@@ -92,11 +106,14 @@ public class OwnerManagerImpl implements OwnerManager {
         return sortedList;
     }
 
-
     @Override
     public List<Owner> search(String keyword) {
         final String lowercaseKeyword = keyword.toLowerCase();
-        return getAll().stream().filter(owner -> owner.getFullName().toLowerCase().contains(lowercaseKeyword) || owner.getId().toLowerCase().contains(lowercaseKeyword) || owner.getContactInformation().toLowerCase().contains(lowercaseKeyword)).collect(Collectors.toList());
+        return getAll().stream()
+                .filter(owner -> owner.getFullName().toLowerCase().contains(lowercaseKeyword) ||
+                        owner.getId().toLowerCase().contains(lowercaseKeyword) ||
+                        owner.getContactInformation().toLowerCase().contains(lowercaseKeyword))
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -9,13 +9,12 @@ import java.util.stream.Collectors;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
-import com.rentalsystem.manager.HostManager;
-import com.rentalsystem.manager.OwnerManager;
-import com.rentalsystem.manager.PropertyManager;
-import com.rentalsystem.manager.RentalManager;
-import com.rentalsystem.manager.TenantManager;
+import com.rentalsystem.manager.*;
 import com.rentalsystem.model.*;
 
+/**
+ * Utility class for handling file operations related to the rental system.
+ */
 public class FileHandler {
     private static final String DATA_DIRECTORY = "resources/data/";
     public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
@@ -26,6 +25,9 @@ public class FileHandler {
     private HostManager hostManager;
     private PropertyManager propertyManager;
 
+    /**
+     * Synchronizes the FileHandler with the various managers in the system.
+     */
     public void syncManager(RentalManager rentalManager, TenantManager tenantManager, OwnerManager ownerManager, HostManager hostManager, PropertyManager propertyManager) {
         this.rentalManager = rentalManager;
         this.hostManager = hostManager;
@@ -34,6 +36,11 @@ public class FileHandler {
         this.propertyManager = propertyManager;
     }
 
+    /**
+     * Reads lines from a CSV file.
+     * @param filename The name of the file to read
+     * @return A list of string arrays, each representing a line in the CSV file
+     */
     public List<String[]> readLines(String filename) {
         File file = new File(DATA_DIRECTORY + filename);
 
@@ -60,6 +67,11 @@ public class FileHandler {
         return null;
     }
 
+    /**
+     * Writes lines to a CSV file.
+     * @param filename The name of the file to write to
+     * @param lines The lines to write to the file
+     */
     public void writeLines(String filename, List<String[]> lines) {
         try (CSVWriter writer = new CSVWriter(new FileWriter(DATA_DIRECTORY + filename))) {
             writer.writeAll(lines);
@@ -69,6 +81,11 @@ public class FileHandler {
         }
     }
 
+    /**
+     * Escapes special characters in a string for CSV format.
+     * @param data The string to escape
+     * @return The escaped string
+     */
     private String escapeSpecialCharacters(String data) {
         if (data == null) {
             throw new IllegalArgumentException("Input data cannot be null");
@@ -81,15 +98,20 @@ public class FileHandler {
         return escapedData;
     }
 
+    /**
+     * Converts a list of strings to a CSV-formatted string.
+     * @param data The list of strings to convert
+     * @return The CSV-formatted string
+     */
     public String convertToCSV(List<String> data) {
         return data.stream()
                 .map(this::escapeSpecialCharacters)
                 .collect(Collectors.joining(","));
     }
 
-
-
-    // TODO: add list of owner, host, tenant
+    /**
+     * Loads rental agreements from file.
+     */
     public void loadRentalAgreements() {
         List<String[]> lines = readLines("rental_agreements.txt");
         for (String[] parts : lines) {
@@ -98,6 +120,10 @@ public class FileHandler {
 
         loadRentalAgreementsTenants();
     }
+
+    /**
+     * Loads rental agreement tenants from file.
+     */
     private void loadRentalAgreementsTenants() {
         List<String[]> lines = readLines("rental_agreements_tenants.txt");
         for (String[] parts : lines) {
@@ -105,19 +131,27 @@ public class FileHandler {
         }
     }
 
+    /**
+     * Saves rental agreement tenants to file.
+     * @param lines The lines to save
+     */
     public void saveRentalAgreementsTenants(List<String[]> lines) {
         writeLines("rental_agreements_tenants.txt", lines);
     }
 
-
-
+    /**
+     * Saves property-host relationships to file.
+     * @param lines The lines to save
+     */
     public void savePropertiesHosts(List<String[]> lines) {
         writeLines("properties_hosts.txt", lines);
     }
 
+    /**
+     * Loads property-host relationships from file.
+     */
     private void loadPropertiesHosts() {
         for (String[] parts : readLines("properties_hosts.txt")) {
-
             if (parts.length == 2) {
                 Property property = propertyManager.get(parts[0]);
                 if (property == null) {
@@ -129,16 +163,16 @@ public class FileHandler {
                     System.out.println("Error loading host id: " + parts[1]);
                     continue;
                 }
-
                 property.addHost(host);
             }
         }
     }
 
-
+    /**
+     * Loads property-tenant relationships from file.
+     */
     private void loadPropertiesTenants() {
         for (String[] parts : readLines("properties_tenants.txt")) {
-
             if (parts.length == 2) {
                 Property property = propertyManager.get(parts[0]);
                 if (property == null) {
@@ -155,10 +189,9 @@ public class FileHandler {
         }
     }
 
-
-
-
-
+    /**
+     * Loads properties from file.
+     */
     public void loadProperties() {
         if (hostManager == null) {
             throw new RuntimeException("hostManager not init");
@@ -173,21 +206,29 @@ public class FileHandler {
             loadPropertiesHosts();
             loadPropertiesTenants();
         }
-
     }
 
+    /**
+     * Loads tenants from file.
+     */
     public void loadTenants() {
         for (String[] parts : readLines("tenants.txt")) {
             tenantManager.add(tenantManager.fromString(parts));
         }
     }
 
+    /**
+     * Loads owners from file.
+     */
     public void loadOwners() {
         for (String[] parts : readLines("owners.txt")) {
             ownerManager.add(ownerManager.fromString(parts));
         }
     }
 
+    /**
+     * Loads hosts from file.
+     */
     public void loadHosts() {
         if (hostManager == null) {
             throw new IllegalStateException("HostManager is not initialized");
@@ -197,36 +238,66 @@ public class FileHandler {
         }
     }
 
+    /**
+     * Saves rental agreements to file.
+     * @param lines The lines to save
+     */
     public void saveRentalAgreements(List<String[]> lines) {
         writeLines("rental_agreements.txt", lines);
     }
 
+    /**
+     * Saves tenants to file.
+     * @param lines The lines to save
+     */
     public void saveTenants(List<String[]> lines) {
         writeLines("tenants.txt", lines);
     }
 
+    /**
+     * Saves owners to file.
+     * @param lines The lines to save
+     */
     public void saveOwners(List<String[]> lines) {
         writeLines("owners.txt", lines);
     }
 
+    /**
+     * Saves hosts to file.
+     * @param lines The lines to save
+     */
     public void saveHosts(List<String[]> lines) {
         writeLines("hosts.txt", lines);
     }
 
+    /**
+     * Saves properties to file.
+     * @param lines The lines to save
+     */
     public void saveProperties(List<String[]> lines) {
         writeLines("properties.txt", lines);
     }
 
+    /**
+     * Saves property-tenant relationships to file.
+     * @param lines The lines to save
+     */
     public void savePropertiesTenants(List<String[]> lines) {
         writeLines("properties_tenants.txt", lines);
     }
 
-
-
+    /**
+     * Saves payments to file.
+     * @param lines The lines to save
+     */
     public void savePayments(List<String[]> lines) {
         writeLines("payments.txt", lines);
     }
 
+    /**
+     * Loads payments from file.
+     * @return A list of Payment objects
+     */
     public List<Payment> loadPayments() {
         List<Payment> payments = new ArrayList<>();
         for (String[] parts : readLines("payments.txt")) {

@@ -4,12 +4,22 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
 
+/**
+ * Abstract base class for all person-related entities in the rental system.
+ */
 public abstract class Person implements Comparable<Person> {
     private String id;
     private String fullName;
     private Date dateOfBirth;
     private String contactInformation;
 
+    /**
+     * Constructs a new Person.
+     * @param id Unique identifier for the person
+     * @param fullName Full name of the person
+     * @param dateOfBirth Date of birth of the person
+     * @param contactInformation Contact information of the person
+     */
     public Person(String id, String fullName, Date dateOfBirth, String contactInformation) {
         this.id = id;
         this.fullName = fullName;
@@ -18,6 +28,7 @@ public abstract class Person implements Comparable<Person> {
     }
 
     // Getters and setters
+
     public String getId() {
         return id;
     }
@@ -73,6 +84,11 @@ public abstract class Person implements Comparable<Person> {
                 '}';
     }
 
+    /**
+     * Abstract method to add a managed agreement.
+     * To be implemented by subclasses.
+     * @param agreement The agreement to be added
+     */
     public abstract void addManagedAgreement(RentalAgreement agreement);
 
     @Override
@@ -80,6 +96,10 @@ public abstract class Person implements Comparable<Person> {
         return this.getId().compareTo(o.getId());
     }
 
+    /**
+     * Converts the person's information to a CSV format.
+     * @return An array of strings representing the person's data in CSV format
+     */
     public String[] toCSV() {
         return new String[] {
                 this.id,

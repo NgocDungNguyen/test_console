@@ -1,10 +1,25 @@
 package com.rentalsystem.model;
 
+/**
+ * Represents a commercial property in the rental system.
+ * Extends the base Property class with additional attributes specific to commercial properties.
+ */
 public class CommercialProperty extends Property {
     private String businessType;
     private int parkingSpaces;
     private double squareFootage;
 
+    /**
+     * Constructs a new CommercialProperty with all attributes.
+     * @param propertyId Unique identifier for the property
+     * @param address Address of the property
+     * @param price Rental price of the property
+     * @param status Current status of the property
+     * @param owner Owner of the property
+     * @param businessType Type of business the property is suitable for
+     * @param parkingSpaces Number of available parking spaces
+     * @param squareFootage Total square footage of the property
+     */
     public CommercialProperty(String propertyId, String address, double price, PropertyStatus status, Owner owner,
                               String businessType, int parkingSpaces, double squareFootage) {
         super(propertyId, address, price, status, owner);
@@ -13,6 +28,13 @@ public class CommercialProperty extends Property {
         this.squareFootage = squareFootage;
     }
 
+    /**
+     * Constructs a CommercialProperty from an existing Property, adding commercial-specific attributes.
+     * @param p Existing Property object
+     * @param businessType Type of business the property is suitable for
+     * @param parkingSpaces Number of available parking spaces
+     * @param squareFootage Total square footage of the property
+     */
     public CommercialProperty(Property p, String businessType, int parkingSpaces, double squareFootage) {
         super(p.getPropertyId(), p.getAddress(), p.getPrice(), p.getStatus(), p.getOwner());
         this.businessType = businessType;
@@ -20,6 +42,7 @@ public class CommercialProperty extends Property {
         this.squareFootage = squareFootage;
     }
 
+    // Getters and setters
     public String getBusinessType() {
         return businessType;
     }

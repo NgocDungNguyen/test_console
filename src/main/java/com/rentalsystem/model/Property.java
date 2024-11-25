@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Represents a property in the rental system.
+ */
 public class Property {
     private String propertyId;
     private String address;
@@ -16,8 +19,14 @@ public class Property {
     private List<Tenant> tenants;
     private List<RentalAgreement> rentalHistory;
 
-
-
+    /**
+     * Constructs a new Property.
+     * @param propertyId Unique identifier for the property
+     * @param address Address of the property
+     * @param price Rental price of the property
+     * @param status Current status of the property
+     * @param owner Owner of the property
+     */
     public Property(String propertyId, String address, double price, PropertyStatus status, Owner owner) {
         this.propertyId = propertyId;
         this.address = address;
@@ -28,6 +37,8 @@ public class Property {
         this.tenants = new ArrayList<>();
         this.rentalHistory = new ArrayList<>();
     }
+
+    // Getters and setters
 
     public String getPropertyId() {
         return propertyId;
@@ -65,6 +76,10 @@ public class Property {
         return owner;
     }
 
+    /**
+     * Sets the owner of the property and updates the owner's owned properties.
+     * @param owner The new owner of the property
+     */
     public void setOwner(Owner owner) {
         if (this.owner != null) {
             this.owner.removeOwnedProperty(this);
@@ -79,51 +94,58 @@ public class Property {
         return hosts;
     }
 
+    /**
+     * Adds a host to the property and updates the host's managed properties.
+     * @param newHost The host to be added
+     */
     public void addHost(Host newHost) {
         this.hosts.add(newHost);
         newHost.addManagedProperty(this);
     }
 
+    /**
+     * Removes a host from the property and updates the host's managed properties.
+     * @param host The host to be removed
+     */
     public void removeHost(Host host) {
         this.hosts.remove(host);
         host.removeManagedProperty(this);
     }
 
-//    public void setHosts(Set<Host> newHost) {
-//        if (this.hosts == newHost) {
-//            return;
-//        }
-//
-//        Set<Host> oldHost = this.hosts;
-//        this.hosts = newHost;
-//
-//        if (oldHost != null) {
-//            oldHost.forEach(host -> host.removeManagedProperty(this));
-//        }
-//
-//        if (newHost != null) {
-//            oldHost.forEach(host -> host.addManagedProperty(this));
-//        }
-//    }
-
     public List<Tenant> getTenants() {
         return new ArrayList<>(tenants);
     }
 
+    /**
+     * Adds a tenant to the property.
+     * @param tenant The tenant to be added
+     */
     public void addTenant(Tenant tenant) {
         if (!tenants.contains(tenant)) {
             tenants.add(tenant);
         }
     }
 
+    /**
+     * Removes a tenant from the property.
+     * @param tenant The tenant to be removed
+     */
     public void removeTenant(Tenant tenant) {
         tenants.remove(tenant);
     }
 
+    /**
+     * Adds a rental agreement to the property's rental history.
+     * @param agreement The rental agreement to be added
+     */
     public void addRentalAgreement(RentalAgreement agreement) {
         rentalHistory.add(agreement);
     }
 
+    /**
+     * Retrieves the rental history of the property.
+     * @return A new ArrayList containing the rental history
+     */
     public List<RentalAgreement> getRentalHistory() {
         return new ArrayList<>(rentalHistory);
     }
@@ -153,11 +175,4 @@ public class Property {
                 ", tenants=" + tenants.size() +
                 '}';
     }
-
-//    public String toSave() {
-//        StringJoiner sj = new StringJoiner(",");
-//        sj.add(propertyId).add(address).add(Double.toString(price)).add(status.toString()).add(owner.getId());
-//        return sj.toString();
-//    }
-
 }

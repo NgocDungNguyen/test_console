@@ -9,6 +9,10 @@ import java.util.stream.Collectors;
 
 import static com.rentalsystem.util.FileHandler.DATE_FORMAT;
 
+/**
+ * Implementation of the RentalManager interface.
+ * Manages RentalAgreement entities in the system.
+ */
 public class RentalManagerImpl implements RentalManager {
     private final Map<String, RentalAgreement> rentalAgreements;
     private final FileHandler fileHandler;
@@ -17,11 +21,22 @@ public class RentalManagerImpl implements RentalManager {
     private HostManager hostManager;
     private OwnerManager ownerManager;
 
+    /**
+     * Constructs a new RentalManagerImpl.
+     * @param fileHandler The FileHandler to use for data persistence
+     */
     public RentalManagerImpl(FileHandler fileHandler) {
         this.fileHandler = fileHandler;
         this.rentalAgreements = new HashMap<>();
     }
 
+    /**
+     * Sets the dependencies for this RentalManager.
+     * @param tenantManager The TenantManager to use
+     * @param propertyManager The PropertyManager to use
+     * @param hostManager The HostManager to use
+     * @param ownerManager The OwnerManager to use
+     */
     public void setDependencies(TenantManager tenantManager, PropertyManager propertyManager, HostManager hostManager, OwnerManager ownerManager) {
         this.tenantManager = tenantManager;
         this.propertyManager = propertyManager;
@@ -29,6 +44,9 @@ public class RentalManagerImpl implements RentalManager {
         this.ownerManager = ownerManager;
     }
 
+    /**
+     * Loads rental agreements from file and initializes their relationships.
+     */
     public void load() {
         if (tenantManager == null || propertyManager == null || hostManager == null || ownerManager == null) {
             throw new IllegalStateException("Dependencies not set for RentalManager");
@@ -40,6 +58,10 @@ public class RentalManagerImpl implements RentalManager {
         }
     }
 
+    /**
+     * Updates the status of a rental agreement based on its dates.
+     * @param agreement The rental agreement to update
+     */
     private void updateAgreementStatus(RentalAgreement agreement) {
         Date currentDate = new Date();
         if (agreement.getStartDate().after(currentDate)) {
@@ -51,6 +73,9 @@ public class RentalManagerImpl implements RentalManager {
         }
     }
 
+    /**
+     * Updates the statuses of all rental agreements in the system.
+     */
     public void updateAgreementStatuses() {
         Date currentDate = new Date();
         for (RentalAgreement agreement : rentalAgreements.values()) {

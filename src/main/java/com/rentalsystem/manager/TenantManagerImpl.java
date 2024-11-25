@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Comparator;
 
-
 import com.rentalsystem.model.Payment;
 import com.rentalsystem.model.Person;
 import com.rentalsystem.model.Tenant;
@@ -19,15 +18,26 @@ import com.rentalsystem.util.InputValidator;
 import static com.rentalsystem.util.FileHandler.DATE_FORMAT;
 import static com.rentalsystem.util.InputValidator.isValidEmail;
 
+/**
+ * Implementation of the TenantManager interface.
+ * Manages Tenant entities in the system.
+ */
 public class TenantManagerImpl implements TenantManager {
     private Map<String, Tenant> tenants;
     private FileHandler fileHandler;
 
+    /**
+     * Constructs a new TenantManagerImpl.
+     * @param fileHandler The FileHandler to use for data persistence
+     */
     public TenantManagerImpl(FileHandler fileHandler) {
         this.fileHandler = fileHandler;
         this.tenants = new HashMap<>();
     }
 
+    /**
+     * Loads tenants from file into the system.
+     */
     public void load() {
         fileHandler.loadTenants();
     }
@@ -51,12 +61,12 @@ public class TenantManagerImpl implements TenantManager {
                 };
                 paymentLines.add(pl);
             }
-
         }
 
         fileHandler.saveTenants(lines);
     }
 
+    @Override
     public Tenant fromString(String[] parts) {
         try {
             return new Tenant(
@@ -68,9 +78,9 @@ public class TenantManagerImpl implements TenantManager {
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
-
     }
 
+    @Override
     public void add(Tenant tenant) {
         if (!isValidEmail(tenant.getContactInformation())) {
             throw new IllegalArgumentException("Invalid email format.");
@@ -81,6 +91,7 @@ public class TenantManagerImpl implements TenantManager {
         tenants.put(tenant.getId(), tenant);
     }
 
+    @Override
     public void update(Tenant tenant) {
         if (!isValidEmail(tenant.getContactInformation())) {
             throw new IllegalArgumentException("Invalid email format for tenant: " + tenant.getContactInformation());
@@ -95,18 +106,22 @@ public class TenantManagerImpl implements TenantManager {
         tenants.put(tenant.getId(), tenant);
     }
 
+    @Override
     public void delete(String id) {
         tenants.remove(id);
     }
 
+    @Override
     public Tenant get(String id) {
         return tenants.get(id);
     }
 
+    @Override
     public List<Tenant> getAll() {
         return new ArrayList<>(tenants.values());
     }
 
+    @Override
     public List<Tenant> getSorted(String sortBy) {
         List<Tenant> sortedList = new ArrayList<>(tenants.values());
         switch (sortBy.toLowerCase()) {
@@ -138,6 +153,7 @@ public class TenantManagerImpl implements TenantManager {
         }
     }
 
+    @Override
     public List<Tenant> search(String keyword) {
         final String lowercaseKeyword = keyword.toLowerCase();
         return tenants.values().stream()
@@ -148,6 +164,7 @@ public class TenantManagerImpl implements TenantManager {
                 .collect(Collectors.toList());
     }
 
+    @Override
     public Tenant getByEmail(String email) {
         return tenants.values().stream()
                 .filter(tenant -> tenant.getContactInformation().equalsIgnoreCase(email))
@@ -155,12 +172,19 @@ public class TenantManagerImpl implements TenantManager {
                 .orElse(null);
     }
 
+    @Override
     public boolean isEmailTaken(String email) {
         final String lowercaseEmail = email.toLowerCase();
         return tenants.values().stream()
                 .anyMatch(tenant -> tenant.getContactInformation().toLowerCase().equals(lowercaseEmail));
     }
 
+    /**
+     * Updates a tenant's email address.
+     * @param tenant The tenant to update
+     * @param newEmail The new email address
+     * @return true if the update was successful, false otherwise
+     */
     public boolean update(Tenant tenant, String newEmail) {
         if (!isValidEmail(newEmail)) {
             throw new IllegalArgumentException("Invalid email format for tenant: " + newEmail);

@@ -2,6 +2,9 @@ package com.rentalsystem.model;
 
 import java.util.*;
 
+/**
+ * Represents a rental agreement in the rental system.
+ */
 public class RentalAgreement {
     private String agreementId;
     private Property property;
@@ -16,19 +19,41 @@ public class RentalAgreement {
     private Status status;
     private List<Payment> payments;
 
+    /**
+     * Enum representing the possible rental periods.
+     */
     public enum RentalPeriod {
         DAILY, WEEKLY, FORTNIGHTLY, MONTHLY
     }
 
+    /**
+     * Enum representing the possible statuses of a rental agreement.
+     */
     public enum Status {
         NEW, ACTIVE, COMPLETED
     }
 
+    /**
+     * Checks if the rental agreement is currently active.
+     * @return true if the agreement is active, false otherwise
+     */
     public boolean isCurrentlyActive() {
         Date currentDate = new Date();
         return currentDate.after(startDate) && currentDate.before(endDate) && status == Status.ACTIVE;
     }
 
+    /**
+     * Constructs a new RentalAgreement.
+     * @param agreementId Unique identifier for the agreement
+     * @param property The property being rented
+     * @param mainTenant The main tenant of the agreement
+     * @param owner The owner of the property
+     * @param host The host managing the property
+     * @param startDate The start date of the agreement
+     * @param endDate The end date of the agreement
+     * @param rentAmount The rent amount
+     * @param rentalPeriod The rental period
+     */
     public RentalAgreement(String agreementId, Property property, Tenant mainTenant, Owner owner, Host host,
                            Date startDate, Date endDate, double rentAmount, RentalPeriod rentalPeriod) {
         this.agreementId = agreementId;
@@ -51,6 +76,8 @@ public class RentalAgreement {
         owner.addRentalAgreement(this);
     }
 
+    // Getters and setters
+
     public String getAgreementId() { return agreementId; }
     public Property getProperty() { return property; }
     public Tenant getMainTenant() { return mainTenant; }
@@ -66,6 +93,10 @@ public class RentalAgreement {
     public void setStatus(Status status) { this.status = status; }
     public List<Tenant> getSubTenants() { return new ArrayList<>(subTenants); }
 
+    /**
+     * Sets the property for this rental agreement and updates related entities.
+     * @param newProperty The new property for this agreement
+     */
     public void setProperty(Property newProperty) {
         if (this.property != null) {
             this.property.removeTenant(mainTenant);
@@ -82,6 +113,10 @@ public class RentalAgreement {
         }
     }
 
+    /**
+     * Adds a sub-tenant to the rental agreement.
+     * @param subTenant The sub-tenant to be added
+     */
     public void addSubTenant(Tenant subTenant) {
         if (mainTenant == subTenant) {
             System.out.println("Main tenant is sub tenant, skip");
@@ -93,6 +128,10 @@ public class RentalAgreement {
         }
     }
 
+    /**
+     * Removes a sub-tenant from the rental agreement.
+     * @param subTenantId The ID of the sub-tenant to be removed
+     */
     public void removeSubTenant(String subTenantId) {
         subTenants.removeIf(tenant -> {
             if (tenant.getId().equals(subTenantId)) {
@@ -104,10 +143,18 @@ public class RentalAgreement {
         });
     }
 
+    /**
+     * Adds a payment to the rental agreement.
+     * @param payment The payment to be added
+     */
     public void addPayment(Payment payment) {
         payments.add(payment);
     }
 
+    /**
+     * Retrieves the list of payments for this rental agreement.
+     * @return A new ArrayList containing the payments
+     */
     public List<Payment> getPayments() {
         return new ArrayList<>(payments);
     }

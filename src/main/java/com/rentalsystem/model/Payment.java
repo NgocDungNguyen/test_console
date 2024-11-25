@@ -2,6 +2,9 @@ package com.rentalsystem.model;
 
 import java.util.Date;
 
+/**
+ * Represents a payment in the rental system.
+ */
 public class Payment {
     private String paymentId;
     private RentalAgreement rentalAgreement;
@@ -10,6 +13,15 @@ public class Payment {
     private double amount;
     private String paymentMethod;
 
+    /**
+     * Constructs a new Payment.
+     * @param paymentId Unique identifier for the payment
+     * @param rentalAgreement The rental agreement associated with this payment
+     * @param tenant The tenant making the payment
+     * @param paymentDate The date of the payment
+     * @param amount The amount paid
+     * @param paymentMethod The method of payment
+     */
     public Payment(String paymentId, RentalAgreement rentalAgreement, Tenant tenant, Date paymentDate, double amount, String paymentMethod) {
         this.paymentId = paymentId;
         this.rentalAgreement = rentalAgreement;
@@ -18,6 +30,8 @@ public class Payment {
         this.amount = amount;
         this.paymentMethod = paymentMethod;
     }
+
+    // Getters and setters
 
     public String getPaymentId() {
         return paymentId;
