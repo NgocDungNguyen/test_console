@@ -1,0 +1,5 @@
+"1","RESIDENTIAL","asd,asd","20000.0","AVAILABLE","1","3","true","true","","",""
+"2","RESIDENTIAL","asd,asd","10000.0","AVAILABLE","1","4","true","true","","",""
+"3","RESIDENTIAL","asd,asd","30000.0","AVAILABLE","1","2","true","true","","",""
+"4","RESIDENTIAL","asd,asd","50000.0","AVAILABLE","1","1","true","true","","",""
+"5","COMMERCIAL","asd,asd","70000.0","AVAILABLE","1","","","","SHOP","2","70000.0"

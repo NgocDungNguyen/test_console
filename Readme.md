@@ -1,0 +1,1 @@
+- property has 1 owner, many hosts
