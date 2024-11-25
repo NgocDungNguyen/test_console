@@ -492,6 +492,9 @@ public class ConsoleUI {
             tableFormatter.printTable("REPORTS", options, TableFormatter.ANSI_RED);
             String choice = readUserInput("Enter your choice: ");
 
+            ((RentalManagerImpl) rentalManager).updateAgreementStatuses(); // Add this line
+
+
             switch (choice) {
                 case "1":
                     generateIncomeReport();
@@ -577,7 +580,7 @@ public class ConsoleUI {
         List<List<String>> data = new ArrayList<>();
         for (Host host : hosts) {
             List<RentalAgreement> activeAgreements = rentalManager.getAll().stream()
-                    .filter(a -> a.getHost().getId().equals(host.getId()) && a.getStatus() == RentalAgreement.Status.ACTIVE)
+                    .filter(a -> a.getHost().getId().equals(host.getId()) && a.isCurrentlyActive())
                     .collect(Collectors.toList());
             int managedProperties = (int) propertyManager.getAll().stream()
                     .filter(p -> p.getHosts().stream().anyMatch(h -> h.getId().equals(host.getId())))
@@ -1641,7 +1644,7 @@ public class ConsoleUI {
         List<List<String>> data = new ArrayList<>();
         for (Tenant tenant : tenants) {
             long activeAgreements = rentalManager.getAll().stream()
-                    .filter(a -> a.getMainTenant().getId().equals(tenant.getId()) && a.getStatus() == RentalAgreement.Status.ACTIVE)
+                    .filter(a -> a.getMainTenant().getId().equals(tenant.getId()) && a.isCurrentlyActive())
                     .count();
             data.add(Arrays.asList(
                     tenant.getId(),

@@ -24,6 +24,11 @@ public class RentalAgreement {
         NEW, ACTIVE, COMPLETED
     }
 
+    public boolean isCurrentlyActive() {
+        Date currentDate = new Date();
+        return currentDate.after(startDate) && currentDate.before(endDate) && status == Status.ACTIVE;
+    }
+
     public RentalAgreement(String agreementId, Property property, Tenant mainTenant, Owner owner, Host host,
                            Date startDate, Date endDate, double rentAmount, RentalPeriod rentalPeriod) {
         this.agreementId = agreementId;

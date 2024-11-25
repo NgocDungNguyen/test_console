@@ -51,6 +51,17 @@ public class RentalManagerImpl implements RentalManager {
         }
     }
 
+    public void updateAgreementStatuses() {
+        Date currentDate = new Date();
+        for (RentalAgreement agreement : rentalAgreements.values()) {
+            if (currentDate.after(agreement.getEndDate())) {
+                agreement.setStatus(RentalAgreement.Status.COMPLETED);
+            } else if (currentDate.after(agreement.getStartDate()) && agreement.getStatus() == RentalAgreement.Status.NEW) {
+                agreement.setStatus(RentalAgreement.Status.ACTIVE);
+            }
+        }
+    }
+
     @Override
     public void add(RentalAgreement agreement) {
         if (rentalAgreements.get(agreement.getAgreementId()) != null) {
