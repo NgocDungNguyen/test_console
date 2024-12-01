@@ -54,30 +54,9 @@ public class HostManagerImpl implements HostManager {
             throw new IllegalStateException("Dependencies not set for HostManager");
         }
 
-
         for (String[] parts : fileHandler.readLines("hosts.txt")) {
             Host host = fromString(parts);
             hosts.put(host.getId(), host);
-        }
-
-
-        // Load host-property relationships
-        for (String[] parts : fileHandler.readLines("properties_hosts.txt")) {
-            if (parts.length == 2) {
-                Property property = propertyManager.get(parts[0]);
-                Host host = get(parts[1]);
-                if (property != null && host != null) {
-                    host.addManagedProperty(property);
-                    property.addHost(host);
-
-
-                    // Update owner's managing hosts
-                    Owner owner = property.getOwner();
-                    if (owner != null) {
-                        owner.addManagingHost(host);
-                    }
-                }
-            }
         }
     }
 
@@ -184,8 +163,14 @@ public class HostManagerImpl implements HostManager {
     @Override
     public void saveToFile() {
         List<String[]> lines = getSorted("id").stream()
-                .map(Person::toCSV).collect(Collectors.toList());
-        fileHandler.saveHosts(lines);
+                .map(entity -> new String[]{
+                        entity.getId(),
+                        entity.getFullName(),
+                        DATE_FORMAT.format(entity.getDateOfBirth()),
+                        entity.getContactInformation()
+                })
+                .collect(Collectors.toList());
+        fileHandler.saveHosts(lines); // Use appropriate method name for each entity type
     }
 
 

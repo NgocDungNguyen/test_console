@@ -164,8 +164,14 @@ public class OwnerManagerImpl implements OwnerManager {
     @Override
     public void saveToFile() {
         List<String[]> lines = getSorted("id").stream()
-                .map(Owner::toCSV).collect(Collectors.toList());
-        fileHandler.saveOwners(lines);
+                .map(entity -> new String[]{
+                        entity.getId(),
+                        entity.getFullName(),
+                        DATE_FORMAT.format(entity.getDateOfBirth()),
+                        entity.getContactInformation()
+                })
+                .collect(Collectors.toList());
+        fileHandler.saveOwners(lines); // Use appropriate method name for each entity type
     }
 
 

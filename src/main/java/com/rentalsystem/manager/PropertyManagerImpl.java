@@ -1,13 +1,10 @@
 package com.rentalsystem.manager;
 
-
 import com.rentalsystem.model.*;
 import com.rentalsystem.util.FileHandler;
 
-
 import java.util.*;
 import java.util.stream.Collectors;
-
 
 public class PropertyManagerImpl implements PropertyManager {
     private Map<String, Property> properties;
@@ -17,12 +14,10 @@ public class PropertyManagerImpl implements PropertyManager {
     private OwnerManager ownerManager;
     private RentalManager rentalManager;
 
-
     public PropertyManagerImpl(FileHandler fileHandler) {
         this.fileHandler = fileHandler;
         this.properties = new HashMap<>();
     }
-
 
     public void setDependencies(HostManager hostManager, TenantManager tenantManager, OwnerManager ownerManager, RentalManager rentalManager) {
         this.hostManager = hostManager;
@@ -31,61 +26,37 @@ public class PropertyManagerImpl implements PropertyManager {
         this.rentalManager = rentalManager;
     }
 
-
     @Override
     public void load() {
         if (hostManager == null || tenantManager == null || ownerManager == null || rentalManager == null) {
             throw new IllegalStateException("Dependencies not set for PropertyManager");
         }
 
-
-        // Load properties
         for (String[] parts : fileHandler.readLines("properties.txt")) {
             Property property = fromString(parts);
             properties.put(property.getPropertyId(), property);
 
-
-            // Update owner's owned properties
             Owner owner = ownerManager.get(property.getOwner().getId());
             if (owner != null) {
                 owner.addOwnedProperty(property);
             }
-        }
 
-
-        // Load property-host relationships
-        for (String[] parts : fileHandler.readLines("properties_hosts.txt")) {
-            if (parts.length == 2) {
-                Property property = get(parts[0]);
-                Host host = hostManager.get(parts[1]);
-                if (property != null && host != null) {
-                    property.addHost(host);
-                    host.addManagedProperty(property);
-
-
-                    // Update owner's managing hosts
-                    Owner owner = property.getOwner();
-                    if (owner != null) {
-                        owner.addManagingHost(host);
+            // Load hosts for the property if the information is available
+            if (parts.length > 12 && parts[12] != null && !parts[12].isEmpty()) {
+                String[] hostIds = parts[12].split(";");
+                for (String hostId : hostIds) {
+                    if (!hostId.isEmpty()) {
+                        Host host = hostManager.get(hostId);
+                        if (host != null) {
+                            property.addHost(host);
+                            host.addManagedProperty(property);
+                            owner.addManagingHost(host);
+                        }
                     }
                 }
             }
         }
-
-
-        // Load property-tenant relationships
-        for (String[] parts : fileHandler.readLines("properties_tenants.txt")) {
-            if (parts.length == 2) {
-                Property property = get(parts[0]);
-                Tenant tenant = tenantManager.get(parts[1]);
-                if (property != null && tenant != null) {
-                    property.addTenant(tenant);
-                    tenant.addRentedProperty(property);
-                }
-            }
-        }
     }
-
 
     @Override
     public void add(Property property) {
@@ -97,7 +68,6 @@ public class PropertyManagerImpl implements PropertyManager {
         saveToFile();
     }
 
-
     @Override
     public void update(Property property) {
         if (!properties.containsKey(property.getPropertyId())) {
@@ -106,7 +76,6 @@ public class PropertyManagerImpl implements PropertyManager {
         properties.put(property.getPropertyId(), property);
         saveToFile();
     }
-
 
     @Override
     public void delete(String propertyId) {
@@ -124,18 +93,15 @@ public class PropertyManagerImpl implements PropertyManager {
         saveToFile();
     }
 
-
     @Override
     public Property get(String propertyId) {
         return properties.get(propertyId);
     }
 
-
     @Override
     public List<Property> getAll() {
         return new ArrayList<>(properties.values());
     }
-
 
     @Override
     public List<Property> getSorted(String sortBy) {
@@ -165,18 +131,15 @@ public class PropertyManagerImpl implements PropertyManager {
         return sortedList;
     }
 
-
     @Override
     public int getTotalProperties() {
         return properties.size();
     }
 
-
     @Override
     public int getOccupiedProperties() {
         return (int) getAll().stream().filter(p -> p.getStatus() == PropertyStatus.RENTED).count();
     }
-
 
     @Override
     public List<Property> search(String keyword) {
@@ -188,14 +151,12 @@ public class PropertyManagerImpl implements PropertyManager {
                 .collect(Collectors.toList());
     }
 
-
     @Override
     public List<Property> getAvailableProperties() {
         return getAll().stream()
                 .filter(property -> property.getStatus() == PropertyStatus.AVAILABLE)
                 .collect(Collectors.toList());
     }
-
 
     private String[] saveProperty(Property property) {
         List<String> propertyData = new ArrayList<>(Arrays.asList(
@@ -206,7 +167,6 @@ public class PropertyManagerImpl implements PropertyManager {
                 property.getStatus().toString(),
                 property.getOwner().getId()
         ));
-
 
         if (property instanceof ResidentialProperty) {
             ResidentialProperty rp = (ResidentialProperty) property;
@@ -226,38 +186,25 @@ public class PropertyManagerImpl implements PropertyManager {
             ));
         }
 
+        // Add hosts
+        String hostIds = property.getHosts().stream()
+                .map(Host::getId)
+                .collect(Collectors.joining(";"));
+        propertyData.add(hostIds);
 
         return propertyData.toArray(new String[0]);
     }
 
-
     @Override
     public void saveToFile() {
         List<String[]> propertyLines = new ArrayList<>();
-        List<String[]> propertyHostsLines = new ArrayList<>();
-        List<String[]> propertyTenantLines = new ArrayList<>();
-
 
         for (Property property : getSorted("id")) {
             propertyLines.add(saveProperty(property));
-
-
-            for (Host host : property.getHosts()) {
-                propertyHostsLines.add(new String[]{property.getPropertyId(), host.getId()});
-            }
-
-
-            for (Tenant tenant : property.getTenants()) {
-                propertyTenantLines.add(new String[]{property.getPropertyId(), tenant.getId()});
-            }
         }
 
-
         fileHandler.saveProperties(propertyLines);
-        fileHandler.savePropertiesHosts(propertyHostsLines);
-        fileHandler.savePropertiesTenants(propertyTenantLines);
     }
-
 
     @Override
     public Property fromString(String[] parts) {
@@ -268,9 +215,7 @@ public class PropertyManagerImpl implements PropertyManager {
         PropertyStatus propertyStatus = PropertyStatus.valueOf(parts[4]);
         String ownerId = parts[5];
 
-
         Owner owner = ownerManager.get(ownerId);
-
 
         Property property;
         switch (propertyType) {
@@ -294,6 +239,16 @@ public class PropertyManagerImpl implements PropertyManager {
                 throw new RuntimeException("Property of type " + propertyType + " does not exist");
         }
 
+        // Load hosts if the information is available
+        if (parts.length > 12 && parts[12] != null && !parts[12].isEmpty()) {
+            String[] hostIds = parts[12].split(";");
+            for (String hostId : hostIds) {
+                Host host = hostManager.get(hostId);
+                if (host != null) {
+                    property.addHost(host);
+                }
+            }
+        }
 
         return property;
     }
