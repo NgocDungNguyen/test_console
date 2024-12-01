@@ -64,4 +64,8 @@ public interface OwnerManager extends CrudManager<Owner> {
      * @return A sorted list of all owners
      */
     List<Owner> getSorted(String sortBy);
+
+
+    boolean isEmailTaken(String email);
+
 }

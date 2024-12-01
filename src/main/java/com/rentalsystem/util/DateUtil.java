@@ -8,33 +8,34 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-
 /**
  * Utility class for handling date-related operations.
  */
 public class DateUtil {
-    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     static {
-        dateFormat.setLenient(false);  // Strict date parsing
+        DATE_FORMAT.setLenient(false);  // Strict date parsing
     }
-
 
     /**
      * Parses a date string into a Date object.
      * @param dateString The date string to parse
-     * @return The parsed Date object, or null if parsing fails
+     * @return The parsed Date object
+     * @throws ParseException if the date string is invalid
      */
-    public static Date parseDate(String dateString) {
-        try {
-            return dateFormat.parse(dateString);
-        } catch (ParseException e) {
-            System.out.println("Invalid date format. Please use yyyy-MM-dd.");
-            return null;
-        }
+    public static Date parseDate(String dateString) throws ParseException {
+        return DATE_FORMAT.parse(dateString);
     }
 
+    /**
+     * Formats a Date object into a string.
+     * @param date The Date object to format
+     * @return The formatted date string, or an empty string if the date is null
+     */
+    public static String formatDate(Date date) {
+        return date != null ? DATE_FORMAT.format(date) : "";
+    }
 
     /**
      * Reads a date input from the console using a LineReader.
@@ -44,24 +45,21 @@ public class DateUtil {
      * @return The parsed Date object
      */
     public static Date readDate(LineReader reader, String prompt) {
-        Date date = null;
-        while (date == null) {
+        while (true) {
             String input = reader.readLine(prompt);
             try {
-                date = dateFormat.parse(input);
+                return parseDate(input);
             } catch (ParseException e) {
                 System.out.println("Invalid date format. Please use yyyy-MM-dd.");
             }
         }
-        return date;
     }
-
 
     /**
      * Reads an optional date input from the console using a LineReader.
      * @param reader The LineReader to use for input
      * @param prompt The prompt to display to the user
-     * @return The parsed Date object, or null if no input is provided
+     * @return The parsed Date object, or null if no input is provided or if the input is invalid
      */
     public static Date readOptionalDate(LineReader reader, String prompt) {
         String input = reader.readLine(prompt);
@@ -69,10 +67,24 @@ public class DateUtil {
             return null;
         }
         try {
-            return dateFormat.parse(input);
+            return parseDate(input);
         } catch (ParseException e) {
             System.out.println("Invalid date format. Please use yyyy-MM-dd.");
             return null;
+        }
+    }
+
+    /**
+     * Validates if a given string is a valid date.
+     * @param dateString The date string to validate
+     * @return true if the date is valid, false otherwise
+     */
+    public static boolean isValidDate(String dateString) {
+        try {
+            parseDate(dateString);
+            return true;
+        } catch (ParseException e) {
+            return false;
         }
     }
 }

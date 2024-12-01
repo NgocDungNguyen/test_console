@@ -5,7 +5,7 @@
 package com.rentalsystem.model;
 
 import java.util.*;
-
+import java.text.SimpleDateFormat;
 
 /**
  * Represents a property owner in the rental system.
@@ -14,7 +14,7 @@ public class Owner extends Person {
     private final List<Property> ownedProperties;
     private final List<Host> managingHosts;
     private final List<RentalAgreement> rentalAgreements;
-
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     /**
      * Constructs a new Owner.
@@ -39,7 +39,6 @@ public class Owner extends Person {
         return new ArrayList<>(ownedProperties);
     }
 
-
     /**
      * Adds a property to the list of properties owned by this owner.
      * @param property The property to be added
@@ -50,7 +49,6 @@ public class Owner extends Person {
         }
     }
 
-
     /**
      * Removes a property from the list of properties owned by this owner.
      * @param property The property to be removed
@@ -59,7 +57,6 @@ public class Owner extends Person {
         ownedProperties.remove(property);
     }
 
-
     /**
      * Retrieves a list of hosts managing this owner's properties.
      * @return A new ArrayList containing the managing hosts
@@ -67,7 +64,6 @@ public class Owner extends Person {
     public List<Host> getManagingHosts() {
         return new ArrayList<>(managingHosts);
     }
-
 
     /**
      * Adds a host to the list of hosts managing this owner's properties.
@@ -80,7 +76,6 @@ public class Owner extends Person {
         }
     }
 
-
     /**
      * Removes a host from the list of hosts managing this owner's properties.
      * @param host The host to be removed
@@ -88,7 +83,6 @@ public class Owner extends Person {
     public void removeManagingHost(Host host) {
         managingHosts.remove(host);
     }
-
 
     /**
      * Retrieves a list of rental agreements associated with this owner.
@@ -98,14 +92,12 @@ public class Owner extends Person {
         return new ArrayList<>(rentalAgreements);
     }
 
-
     @Override
     public void addManagedAgreement(RentalAgreement agreement) {
         if (!rentalAgreements.contains(agreement)) {
             rentalAgreements.add(agreement);
         }
     }
-
 
     /**
      * Removes a managed agreement from this owner.
@@ -114,7 +106,6 @@ public class Owner extends Person {
     public void removeManagedAgreement(RentalAgreement agreement) {
         rentalAgreements.remove(agreement);
     }
-
 
     /**
      * Adds a rental agreement to this owner.
@@ -126,7 +117,6 @@ public class Owner extends Person {
         }
     }
 
-
     /**
      * Removes a rental agreement from this owner.
      * @param agreement The agreement to be removed
@@ -134,7 +124,6 @@ public class Owner extends Person {
     public void removeRentalAgreement(RentalAgreement agreement) {
         rentalAgreements.remove(agreement);
     }
-
 
     @Override
     public String toString() {

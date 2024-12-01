@@ -1,4 +1,4 @@
-"P001","RESIDENTIAL","123 Main St","1500.0","AVAILABLE","O001","3","true","true","","","","H001;H002"
+"P001","RESIDENTIAL","123 Main St","1500.0","AVAILABLE","O001","3","true","true","","","","H002;H001"
 "P002","COMMERCIAL","456 Business Ave","3000.0","RENTED","O002","","","","Office","10","2000.0","H002"
 "P003","RESIDENTIAL","789 Park Rd","2000.0","RENTED","O003","2","false","true","","","","H003"
 "P004","COMMERCIAL","101 Industry Ln","2500.0","AVAILABLE","O004","","","","Retail","5","1500.0","H004"

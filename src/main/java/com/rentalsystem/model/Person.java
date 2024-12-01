@@ -18,7 +18,6 @@ public abstract class Person implements Comparable<Person> {
     private Date dateOfBirth;
     private String contactInformation;
 
-
     /**
      * Constructs a new Person.
      * @param id Unique identifier for the person
@@ -56,14 +55,16 @@ public abstract class Person implements Comparable<Person> {
         this.fullName = fullName;
     }
 
-
-    public String getDateOfBirth() {
-        return new SimpleDateFormat("yyyy-MM-dd").format(dateOfBirth);
+    public Date getDateOfBirth() {
+        return dateOfBirth;
     }
-
 
     public void setDateOfBirth(Date dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+
+    public String getDateOfBirthString() {
+        return dateOfBirth != null ? new SimpleDateFormat("yyyy-MM-dd").format(dateOfBirth) : "";
     }
 
 
@@ -125,7 +126,7 @@ public abstract class Person implements Comparable<Person> {
         return new String[] {
                 this.id,
                 this.fullName,
-                this.getDateOfBirth(),
+                this.getDateOfBirthString(), // Use getDateOfBirthString() instead of getDateOfBirth()
                 this.contactInformation
         };
     }

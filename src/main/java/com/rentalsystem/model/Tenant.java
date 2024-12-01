@@ -138,7 +138,7 @@ public class Tenant extends Person {
         return String.join(",",
                 getId(),
                 getFullName(),
-                getDateOfBirth(),
+                getDateOfBirthString(),
                 getContactInformation()
         );
     }

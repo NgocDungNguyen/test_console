@@ -1,7 +1,3 @@
-/**
- * @author <Nguyen Ngoc Dung - s3978535>
- */
-
 package com.rentalsystem.manager;
 
 import java.text.ParseException;
@@ -11,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Comparator;
+import java.util.Date;
 
 import com.rentalsystem.model.Owner;
 import com.rentalsystem.util.FileHandler;
@@ -19,8 +16,6 @@ import com.rentalsystem.model.Property;
 import com.rentalsystem.model.Host;
 
 import static com.rentalsystem.util.FileHandler.DATE_FORMAT;
-import static com.rentalsystem.util.InputValidator.isEmailTaken;
-
 
 /**
  * Implementation of the OwnerManager interface.
@@ -37,7 +32,6 @@ public class OwnerManagerImpl implements OwnerManager {
      * Initializes the owners map.
      * @param fileHandler The FileHandler to use for data persistence
      */
-
     public OwnerManagerImpl(FileHandler fileHandler) {
         this.fileHandler = fileHandler;
         this.owners = new HashMap<>();
@@ -91,15 +85,22 @@ public class OwnerManagerImpl implements OwnerManager {
      */
     @Override
     public void add(Owner owner) {
-        if (!InputValidator.isValidEmail(owner.getContactInformation())) {
-            throw new IllegalArgumentException("Invalid email format for owner: " + owner.getContactInformation());
+        try {
+            if (!InputValidator.isValidEmail(owner.getContactInformation())) {
+                throw new IllegalArgumentException("Invalid email format for owner: " + owner.getContactInformation());
+            }
+            if (isEmailTaken(owner.getContactInformation())) {
+                throw new IllegalArgumentException("Email already in use: " + owner.getContactInformation());
+            }
+            owners.put(owner.getId(), owner);
+            saveToFile();
+        } catch (Exception e) {
+            System.out.println("Error in OwnerManagerImpl.add(): " + e.getMessage());
+            e.printStackTrace();
+            throw e; // Re-throw the exception to be caught in the UI layer
         }
-        if (isEmailTaken(getAll(), owner.getContactInformation())) {
-            throw new IllegalArgumentException("Email already in use: " + owner.getContactInformation());
-        }
-        owners.put(owner.getId(), owner);
-        saveToFile();
     }
+
 
     /**
      * Updates an existing owner in the system.
@@ -116,7 +117,7 @@ public class OwnerManagerImpl implements OwnerManager {
         if (existingOwner == null) {
             throw new IllegalArgumentException("Owner with ID " + owner.getId() + " does not exist.");
         }
-        if (!existingOwner.getContactInformation().equals(owner.getContactInformation()) && isEmailTaken(getAll(), owner.getContactInformation())) {
+        if (!existingOwner.getContactInformation().equals(owner.getContactInformation()) && isEmailTaken(owner.getContactInformation())) {
             throw new IllegalArgumentException("Email already in use: " + owner.getContactInformation());
         }
         owners.put(owner.getId(), owner);
@@ -200,34 +201,47 @@ public class OwnerManagerImpl implements OwnerManager {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public boolean isEmailTaken(String email) {
+        return getAll().stream()
+                .anyMatch(owner -> owner.getContactInformation().equalsIgnoreCase(email));
+    }
+
     /**
      * Saves the current state of owners to the file system.
      */
     @Override
     public void saveToFile() {
-        List<String[]> lines = getSorted("id").stream()
-                .map(entity -> new String[]{
-                        entity.getId(),
-                        entity.getFullName(),
-                        DATE_FORMAT.format(entity.getDateOfBirth()),
-                        entity.getContactInformation()
-                })
-                .collect(Collectors.toList());
-        fileHandler.saveOwners(lines); // Use appropriate method name for each entity type
+        try {
+            List<String[]> lines = getSorted("id").stream()
+                    .map(entity -> new String[]{
+                            entity.getId(),
+                            entity.getFullName(),
+                            DATE_FORMAT.format(entity.getDateOfBirth()),
+                            entity.getContactInformation()
+                    })
+                    .collect(Collectors.toList());
+            fileHandler.saveOwners(lines);
+        } catch (Exception e) {
+            System.out.println("Error in OwnerManagerImpl.saveToFile(): " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     /**
      * Creates an Owner object from a string array representation.
      * @param parts The string array containing owner data
      * @return The created Owner object
-     * @throws RuntimeException if there's an error parsing the date
+     * @throws IllegalArgumentException if there's an error parsing the date
      */
     @Override
     public Owner fromString(String[] parts) {
         try {
-            return new Owner(parts[0], parts[1], DATE_FORMAT.parse(parts[2]), parts[3]);
+            Date dateOfBirth = DATE_FORMAT.parse(parts[2]);
+            return new Owner(parts[0], parts[1], dateOfBirth, parts[3]);
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException("Invalid date format: " + parts[2], e);
         }
     }
 }

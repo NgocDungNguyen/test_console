@@ -4,16 +4,21 @@
 
 package com.rentalsystem.ui;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.regex.Pattern;
+import java.util.function.Function;
+
+
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.text.SimpleDateFormat;
 
 import com.rentalsystem.model.Payment;
 import com.rentalsystem.model.PropertyStatus;
@@ -47,6 +52,11 @@ import com.rentalsystem.model.Tenant;
 import com.rentalsystem.util.DateUtil;
 import com.rentalsystem.util.InputValidator;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import static com.rentalsystem.util.FileHandler.DATE_FORMAT;
+
+
 import static com.rentalsystem.util.InputValidator.isEmailTaken;
 
 
@@ -78,6 +88,8 @@ public class ConsoleUI {
     public static final String ANSI_GREEN = "\u001B[32m";
     public static final String ANSI_RESET = "\u001B[0m";
 
+
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
 
     // ASCII art for the application logo
     private static final String[] RENTAL_ASCII = {
@@ -401,6 +413,12 @@ public class ConsoleUI {
         }
     }
 
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        if (email == null) return false;
+        return pattern.matcher(email).matches();
+    }
 
     /**
      * Handles the Rental Agreements submenu.
@@ -775,6 +793,40 @@ public class ConsoleUI {
         return input;
     }
 
+    private Date readValidDateOfBirth(String prompt) {
+        while (true) {
+            String dobInput = readUserInputAllowEsc(prompt);
+            if (dobInput == null) return null;
+            try {
+                SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                dateFormat.setLenient(false);
+                Date dateOfBirth = dateFormat.parse(dobInput);
+
+                if (dateOfBirth.after(new Date())) {
+                    System.out.println(TableFormatter.ANSI_RED + "Error: Date of birth cannot be in the future." + TableFormatter.ANSI_RESET);
+                } else {
+                    return dateOfBirth;
+                }
+            } catch (ParseException e) {
+                System.out.println(TableFormatter.ANSI_RED + "Invalid date format or date. Please use yyyy-MM-dd and ensure it's a valid date." + TableFormatter.ANSI_RESET);
+            }
+        }
+    }
+
+    private String readValidEmail(String prompt, Function<String, Boolean> isEmailTaken) {
+        while (true) {
+            String email = readUserInputAllowEsc(prompt);
+            if (email == null) return null;
+            if (!isValidEmail(email)) {
+                System.out.println(TableFormatter.ANSI_RED + "Invalid email format. Please enter a valid email address." + TableFormatter.ANSI_RESET);
+            } else if (isEmailTaken.apply(email)) {
+                System.out.println(TableFormatter.ANSI_RED + "Email is already in use." + TableFormatter.ANSI_RESET);
+            } else {
+                return email;
+            }
+        }
+    }
+
     /**
      * Prompts the user to input a property ID and returns the corresponding Property object.
      * @return The selected Property object
@@ -997,12 +1049,17 @@ public class ConsoleUI {
                     throw new IllegalArgumentException("Rental agreement not found.");
                 }
 
-                Date endDate = DateUtil.readOptionalDate(reader, "Enter new end date (yyyy-MM-dd, press enter to keep current): ");
-                if (endDate != null) {
-                    if (endDate.before(agreement.getStartDate())) {
-                        throw new IllegalArgumentException("End date must be after start date.");
+                String endDateStr = readUserInputAllowEmpty("Enter new end date (yyyy-MM-dd, press enter to keep current): ");
+                if (!endDateStr.isEmpty()) {
+                    try {
+                        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse(endDateStr);
+                        if (endDate.before(agreement.getStartDate())) {
+                            throw new IllegalArgumentException("End date must be after start date.");
+                        }
+                        agreement.setEndDate(endDate);
+                    } catch (ParseException e) {
+                        throw new IllegalArgumentException("Invalid date format. Please use yyyy-MM-dd.");
                     }
-                    agreement.setEndDate(endDate);
                 }
 
                 String rentAmountStr = readUserInputAllowEmpty("Enter new rent amount (press enter to keep current): ");
@@ -1041,7 +1098,6 @@ public class ConsoleUI {
             }
         }
     }
-
 
     /**
      * Deletes a rental agreement from the system.
@@ -1134,28 +1190,11 @@ public class ConsoleUI {
         String fullName = readUserInputAllowEsc("Enter full name (press ESC to return): ");
         if (fullName == null) return;
 
-        Date dateOfBirth = null;
-        while (dateOfBirth == null) {
-            String dobInput = readUserInputAllowEsc("Enter date of birth (yyyy-MM-dd, press ESC to return): ");
-            if (dobInput == null) return;
-            dateOfBirth = DateUtil.parseDate(dobInput);
-            if (dateOfBirth == null) {
-                System.out.println(TableFormatter.ANSI_RED + "Invalid date format. Please use yyyy-MM-dd." + TableFormatter.ANSI_RESET);
-            }
-        }
+        Date dateOfBirth = readValidDateOfBirth("Enter date of birth (yyyy-MM-dd, press ESC to return): ");
+        if (dateOfBirth == null) return;
 
-        String contactInfo = null;
-        while (contactInfo == null) {
-            contactInfo = readUserInputAllowEsc("Enter contact information (email, press ESC to return): ");
-            if (contactInfo == null) return;
-            if (!InputValidator.isValidEmail(contactInfo)) {
-                System.out.println(TableFormatter.ANSI_RED + "Invalid email format." + TableFormatter.ANSI_RESET);
-                contactInfo = null;
-            } else if (tenantManager.isEmailTaken(contactInfo)) {
-                System.out.println(TableFormatter.ANSI_RED + "Email is already in use by another tenant." + TableFormatter.ANSI_RESET);
-                contactInfo = null;
-            }
-        }
+        String contactInfo = readValidEmail("Enter contact information (email, press ESC to return): ", tenantManager::isEmailTaken);
+        if (contactInfo == null) return;
 
         try {
             Tenant tenant = new Tenant(id, fullName, dateOfBirth, contactInfo);
@@ -1166,7 +1205,6 @@ public class ConsoleUI {
             System.out.println(TableFormatter.ANSI_RED + "Error: " + e.getMessage() + TableFormatter.ANSI_RESET);
         }
     }
-
 
     private void updateTenant() {
         while (true) {
@@ -1184,19 +1222,44 @@ public class ConsoleUI {
                     tenant.setFullName(fullName);
                 }
 
-                Date dateOfBirth = DateUtil.readOptionalDate(reader, "Enter new date of birth (yyyy-MM-dd, press enter to keep current): ");
-                if (dateOfBirth != null) {
-                    tenant.setDateOfBirth(dateOfBirth);
+                String dobInput = readUserInputAllowEmpty("Enter new date of birth (yyyy-MM-dd, press enter to keep current): ");
+                if (!dobInput.isEmpty()) {
+                    Date dateOfBirth = null;
+                    while (dateOfBirth == null) {
+                        try {
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                            dateFormat.setLenient(false);
+                            dateOfBirth = dateFormat.parse(dobInput);
+
+                            if (dateOfBirth.after(new Date())) {
+                                System.out.println(TableFormatter.ANSI_RED + "Error: Date of birth cannot be in the future." + TableFormatter.ANSI_RESET);
+                                dobInput = readUserInputAllowEmpty("Enter new date of birth (yyyy-MM-dd, press enter to keep current): ");
+                                if (dobInput.isEmpty()) break;
+                                dateOfBirth = null;
+                            }
+                        } catch (ParseException e) {
+                            System.out.println(TableFormatter.ANSI_RED + "Invalid date format or date. Please use yyyy-MM-dd and ensure it's a valid date." + TableFormatter.ANSI_RESET);
+                            dobInput = readUserInputAllowEmpty("Enter new date of birth (yyyy-MM-dd, press enter to keep current): ");
+                            if (dobInput.isEmpty()) break;
+                        }
+                    }
+                    if (dateOfBirth != null) {
+                        tenant.setDateOfBirth(dateOfBirth);
+                    }
                 }
 
                 String contactInfo = readUserInputAllowEmpty("Enter new contact information (email, press enter to keep current): ");
                 if (!contactInfo.isEmpty()) {
-                    if (!InputValidator.isValidEmail(contactInfo)) {
-                        throw new IllegalArgumentException("Invalid email format.");
-                    } else if (!contactInfo.equals(tenant.getContactInformation()) && tenantManager.isEmailTaken(contactInfo)) {
-                        throw new IllegalArgumentException("Email is already in use by another tenant.");
+                    while (!isValidEmail(contactInfo)) {
+                        System.out.println(TableFormatter.ANSI_RED + "Invalid email format. Please enter a valid email address." + TableFormatter.ANSI_RESET);
+                        contactInfo = readUserInputAllowEmpty("Enter new contact information (email, press enter to keep current): ");
+                        if (contactInfo.isEmpty()) break;
                     }
-                    tenant.setContactInformation(contactInfo);
+                    if (!contactInfo.isEmpty() && !contactInfo.equals(tenant.getContactInformation()) && tenantManager.isEmailTaken(contactInfo)) {
+                        System.out.println(TableFormatter.ANSI_RED + "Email is already in use by another tenant." + TableFormatter.ANSI_RESET);
+                    } else if (!contactInfo.isEmpty()) {
+                        tenant.setContactInformation(contactInfo);
+                    }
                 }
 
                 tenantManager.update(tenant);
@@ -1213,7 +1276,6 @@ public class ConsoleUI {
             }
         }
     }
-
 
     private void deleteTenant() {
         while (true) {
@@ -1253,7 +1315,7 @@ public class ConsoleUI {
         List<List<String>> data = List.of(Arrays.asList(
                 tenant.getId(),
                 tenant.getFullName(),
-                tenant.getDateOfBirth(),
+                tenant.getDateOfBirthString(),
                 tenant.getContactInformation()
         ));
         tableFormatter.printDataTable(headers, data, TableFormatter.ANSI_CYAN);
@@ -1283,7 +1345,7 @@ public class ConsoleUI {
                 data.add(Arrays.asList(
                         tenant.getId(),
                         tenant.getFullName(),
-                        tenant.getDateOfBirth(),
+                        tenant.getDateOfBirthString(),
                         tenant.getContactInformation()
                 ));
             }
@@ -1306,28 +1368,11 @@ public class ConsoleUI {
         String fullName = readUserInputAllowEsc("Enter full name (press ESC to return): ");
         if (fullName == null) return;
 
-        Date dateOfBirth = null;
-        while (dateOfBirth == null) {
-            String dobInput = readUserInputAllowEsc("Enter date of birth (yyyy-MM-dd, press ESC to return): ");
-            if (dobInput == null) return;
-            dateOfBirth = DateUtil.parseDate(dobInput);
-            if (dateOfBirth == null) {
-                System.out.println(TableFormatter.ANSI_RED + "Invalid date format. Please use yyyy-MM-dd." + TableFormatter.ANSI_RESET);
-            }
-        }
+        Date dateOfBirth = readValidDateOfBirth("Enter date of birth (yyyy-MM-dd, press ESC to return): ");
+        if (dateOfBirth == null) return;
 
-        String contactInfo = null;
-        while (contactInfo == null) {
-            contactInfo = readUserInputAllowEsc("Enter contact information (email, press ESC to return): ");
-            if (contactInfo == null) return;
-            if (!InputValidator.isValidEmail(contactInfo)) {
-                System.out.println(TableFormatter.ANSI_RED + "Invalid email format." + TableFormatter.ANSI_RESET);
-                contactInfo = null;
-            } else if (isEmailTaken(ownerManager.getAll(), contactInfo)) {
-                System.out.println(TableFormatter.ANSI_RED + "Email is already in use by another owner." + TableFormatter.ANSI_RESET);
-                contactInfo = null;
-            }
-        }
+        String contactInfo = readValidEmail("Enter contact information (email, press ESC to return): ", ownerManager::isEmailTaken);
+        if (contactInfo == null) return;
 
         try {
             Owner owner = new Owner(id, fullName, dateOfBirth, contactInfo);
@@ -1355,19 +1400,44 @@ public class ConsoleUI {
                     owner.setFullName(fullName);
                 }
 
-                Date dateOfBirth = DateUtil.readOptionalDate(reader, "Enter new date of birth (yyyy-MM-dd, press enter to keep current): ");
-                if (dateOfBirth != null) {
-                    owner.setDateOfBirth(dateOfBirth);
+                String dobInput = readUserInputAllowEmpty("Enter new date of birth (yyyy-MM-dd, press enter to keep current): ");
+                if (!dobInput.isEmpty()) {
+                    Date dateOfBirth = null;
+                    while (dateOfBirth == null) {
+                        try {
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                            dateFormat.setLenient(false);
+                            dateOfBirth = dateFormat.parse(dobInput);
+
+                            if (dateOfBirth.after(new Date())) {
+                                System.out.println(TableFormatter.ANSI_RED + "Error: Date of birth cannot be in the future." + TableFormatter.ANSI_RESET);
+                                dobInput = readUserInputAllowEmpty("Enter new date of birth (yyyy-MM-dd, press enter to keep current): ");
+                                if (dobInput.isEmpty()) break;
+                                dateOfBirth = null;
+                            }
+                        } catch (ParseException e) {
+                            System.out.println(TableFormatter.ANSI_RED + "Invalid date format or date. Please use yyyy-MM-dd and ensure it's a valid date." + TableFormatter.ANSI_RESET);
+                            dobInput = readUserInputAllowEmpty("Enter new date of birth (yyyy-MM-dd, press enter to keep current): ");
+                            if (dobInput.isEmpty()) break;
+                        }
+                    }
+                    if (dateOfBirth != null) {
+                        owner.setDateOfBirth(dateOfBirth);
+                    }
                 }
 
                 String contactInfo = readUserInputAllowEmpty("Enter new contact information (email, press enter to keep current): ");
                 if (!contactInfo.isEmpty()) {
-                    if (!InputValidator.isValidEmail(contactInfo)) {
-                        throw new IllegalArgumentException("Invalid email format.");
-                    } else if (!contactInfo.equals(owner.getContactInformation()) && isEmailTaken(ownerManager.getAll(), contactInfo)) {
-                        throw new IllegalArgumentException("Email is already in use by another owner.");
+                    while (!isValidEmail(contactInfo)) {
+                        System.out.println(TableFormatter.ANSI_RED + "Invalid email format. Please enter a valid email address." + TableFormatter.ANSI_RESET);
+                        contactInfo = readUserInputAllowEmpty("Enter new contact information (email, press enter to keep current): ");
+                        if (contactInfo.isEmpty()) break;
                     }
-                    owner.setContactInformation(contactInfo);
+                    if (!contactInfo.isEmpty() && !contactInfo.equals(owner.getContactInformation()) && ownerManager.isEmailTaken(contactInfo)) {
+                        System.out.println(TableFormatter.ANSI_RED + "Email is already in use by another owner." + TableFormatter.ANSI_RESET);
+                    } else if (!contactInfo.isEmpty()) {
+                        owner.setContactInformation(contactInfo);
+                    }
                 }
 
                 ownerManager.update(owner);
@@ -1384,7 +1454,6 @@ public class ConsoleUI {
             }
         }
     }
-
 
     private void deleteOwner() {
         while (true) {
@@ -1424,11 +1493,12 @@ public class ConsoleUI {
         List<List<String>> data = List.of(Arrays.asList(
                 owner.getId(),
                 owner.getFullName(),
-                owner.getDateOfBirth(),
+                owner.getDateOfBirthString(),
                 owner.getContactInformation()
         ));
         tableFormatter.printDataTable(headers, data, TableFormatter.ANSI_CYAN);
     }
+
 
 
     private void listOwners() {
@@ -1454,7 +1524,7 @@ public class ConsoleUI {
                 data.add(Arrays.asList(
                         owner.getId(),
                         owner.getFullName(),
-                        owner.getDateOfBirth(),
+                        owner.getDateOfBirthString(),
                         owner.getContactInformation()
                 ));
             }
@@ -1477,28 +1547,11 @@ public class ConsoleUI {
         String fullName = readUserInputAllowEsc("Enter full name (press ESC to return): ");
         if (fullName == null) return;
 
-        Date dateOfBirth = null;
-        while (dateOfBirth == null) {
-            String dobInput = readUserInputAllowEsc("Enter date of birth (yyyy-MM-dd, press ESC to return): ");
-            if (dobInput == null) return;
-            dateOfBirth = DateUtil.parseDate(dobInput);
-            if (dateOfBirth == null) {
-                System.out.println(TableFormatter.ANSI_RED + "Invalid date format. Please use yyyy-MM-dd." + TableFormatter.ANSI_RESET);
-            }
-        }
+        Date dateOfBirth = readValidDateOfBirth("Enter date of birth (yyyy-MM-dd, press ESC to return): ");
+        if (dateOfBirth == null) return;
 
-        String contactInfo = null;
-        while (contactInfo == null) {
-            contactInfo = readUserInputAllowEsc("Enter contact information (email, press ESC to return): ");
-            if (contactInfo == null) return;
-            if (!InputValidator.isValidEmail(contactInfo)) {
-                System.out.println(TableFormatter.ANSI_RED + "Invalid email format." + TableFormatter.ANSI_RESET);
-                contactInfo = null;
-            } else if (hostManager.isEmailTaken(contactInfo)) {
-                System.out.println(TableFormatter.ANSI_RED + "Email is already in use by another host." + TableFormatter.ANSI_RESET);
-                contactInfo = null;
-            }
-        }
+        String contactInfo = readValidEmail("Enter contact information (email, press ESC to return): ", hostManager::isEmailTaken);
+        if (contactInfo == null) return;
 
         try {
             Host host = new Host(id, fullName, dateOfBirth, contactInfo);
@@ -1509,7 +1562,6 @@ public class ConsoleUI {
             System.out.println(TableFormatter.ANSI_RED + "Error: " + e.getMessage() + TableFormatter.ANSI_RESET);
         }
     }
-
 
     private void updateHost() {
         while (true) {
@@ -1527,19 +1579,44 @@ public class ConsoleUI {
                     host.setFullName(fullName);
                 }
 
-                Date dateOfBirth = DateUtil.readOptionalDate(reader, "Enter new date of birth (yyyy-MM-dd, press enter to keep current): ");
-                if (dateOfBirth != null) {
-                    host.setDateOfBirth(dateOfBirth);
+                String dobInput = readUserInputAllowEmpty("Enter new date of birth (yyyy-MM-dd, press enter to keep current): ");
+                if (!dobInput.isEmpty()) {
+                    Date dateOfBirth = null;
+                    while (dateOfBirth == null) {
+                        try {
+                            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                            dateFormat.setLenient(false);
+                            dateOfBirth = dateFormat.parse(dobInput);
+
+                            if (dateOfBirth.after(new Date())) {
+                                System.out.println(TableFormatter.ANSI_RED + "Error: Date of birth cannot be in the future." + TableFormatter.ANSI_RESET);
+                                dobInput = readUserInputAllowEmpty("Enter new date of birth (yyyy-MM-dd, press enter to keep current): ");
+                                if (dobInput.isEmpty()) break;
+                                dateOfBirth = null;
+                            }
+                        } catch (ParseException e) {
+                            System.out.println(TableFormatter.ANSI_RED + "Invalid date format or date. Please use yyyy-MM-dd and ensure it's a valid date." + TableFormatter.ANSI_RESET);
+                            dobInput = readUserInputAllowEmpty("Enter new date of birth (yyyy-MM-dd, press enter to keep current): ");
+                            if (dobInput.isEmpty()) break;
+                        }
+                    }
+                    if (dateOfBirth != null) {
+                        host.setDateOfBirth(dateOfBirth);
+                    }
                 }
 
                 String contactInfo = readUserInputAllowEmpty("Enter new contact information (email, press enter to keep current): ");
                 if (!contactInfo.isEmpty()) {
-                    if (!InputValidator.isValidEmail(contactInfo)) {
-                        throw new IllegalArgumentException("Invalid email format.");
-                    } else if (!contactInfo.equals(host.getContactInformation()) && hostManager.isEmailTaken(contactInfo)) {
-                        throw new IllegalArgumentException("Email is already in use by another host.");
+                    while (!isValidEmail(contactInfo)) {
+                        System.out.println(TableFormatter.ANSI_RED + "Invalid email format. Please enter a valid email address." + TableFormatter.ANSI_RESET);
+                        contactInfo = readUserInputAllowEmpty("Enter new contact information (email, press enter to keep current): ");
+                        if (contactInfo.isEmpty()) break;
                     }
-                    host.setContactInformation(contactInfo);
+                    if (!contactInfo.isEmpty() && !contactInfo.equals(host.getContactInformation()) && hostManager.isEmailTaken(contactInfo)) {
+                        System.out.println(TableFormatter.ANSI_RED + "Email is already in use by another host." + TableFormatter.ANSI_RESET);
+                    } else if (!contactInfo.isEmpty()) {
+                        host.setContactInformation(contactInfo);
+                    }
                 }
 
                 hostManager.update(host);
@@ -1556,7 +1633,6 @@ public class ConsoleUI {
             }
         }
     }
-
 
     private void deleteHost() {
         while (true) {
@@ -1596,7 +1672,7 @@ public class ConsoleUI {
         List<List<String>> data = List.of(Arrays.asList(
                 host.getId(),
                 host.getFullName(),
-                host.getDateOfBirth(),
+                host.getDateOfBirthString(),
                 host.getContactInformation()
         ));
         tableFormatter.printDataTable(headers, data, TableFormatter.ANSI_CYAN);
@@ -1626,7 +1702,7 @@ public class ConsoleUI {
                 data.add(Arrays.asList(
                         host.getId(),
                         host.getFullName(),
-                        host.getDateOfBirth(),
+                        host.getDateOfBirthString(),
                         host.getContactInformation(),
                         String.valueOf(host.getManagedProperties().size())
                 ));
@@ -2010,7 +2086,7 @@ public class ConsoleUI {
             data.add(Arrays.asList(
                     tenant.getId(),
                     tenant.getFullName(),
-                    tenant.getDateOfBirth(),
+                    tenant.getDateOfBirthString(),
                     tenant.getContactInformation(),
                     String.valueOf(activeAgreements)
             ));
@@ -2085,7 +2161,7 @@ public class ConsoleUI {
             data.add(Arrays.asList(
                     tenant.getId(),
                     tenant.getFullName(),
-                    tenant.getDateOfBirth(),
+                    tenant.getDateOfBirthString(),
                     tenant.getContactInformation(),
                     rentedProperty,
                     rentalContractId,
@@ -2125,7 +2201,7 @@ public class ConsoleUI {
             data.add(Arrays.asList(
                     owner.getId(),
                     owner.getFullName(),
-                    owner.getDateOfBirth(),
+                    owner.getDateOfBirthString(),
                     owner.getContactInformation(),
                     ownedProperties,
                     managingHosts
@@ -2159,7 +2235,7 @@ public class ConsoleUI {
             data.add(Arrays.asList(
                     host.getId(),
                     host.getFullName(),
-                    host.getDateOfBirth(),
+                    host.getDateOfBirthString(),
                     host.getContactInformation(),
                     managedProperties,
                     propertyOwners

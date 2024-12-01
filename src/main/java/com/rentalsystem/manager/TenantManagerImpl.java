@@ -226,29 +226,21 @@ public class TenantManagerImpl implements TenantManager {
      */
     @Override
     public void saveToFile() {
-        List<String[]> lines = new ArrayList<>();
-        List<String[]> paymentLines = new ArrayList<>();
-
-
-        for (Tenant t : getSorted("id")) {
-            lines.add(t.toCSV());
-
-
-            for (Payment payment : t.getPayments()) {
-                String[] pl = new String[] {
-                        payment.getPaymentId(),
-                        payment.getRentalAgreement().getAgreementId(),
-                        t.getId(),
-                        DATE_FORMAT.format(payment.getPaymentDate()),
-                        String.valueOf(payment.getAmount()),
-                        payment.getPaymentMethod()
-                };
-                paymentLines.add(pl);
-            }
+        try {
+            List<String[]> lines = getSorted("id").stream()
+                    .map(entity -> new String[]{
+                            entity.getId(),
+                            entity.getFullName(),
+                            DATE_FORMAT.format(entity.getDateOfBirth()),
+                            entity.getContactInformation()
+                    })
+                    .collect(Collectors.toList());
+            fileHandler.saveTenants(lines);
+        } catch (Exception e) {
+            System.out.println("Error in TenantManagerImpl.saveToFile(): " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
-
-
-        fileHandler.saveTenants(lines);
     }
 
     /**
@@ -267,7 +259,7 @@ public class TenantManagerImpl implements TenantManager {
                     parts[3]
             );
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException("Invalid date format: " + parts[2], e);
         }
     }
 }

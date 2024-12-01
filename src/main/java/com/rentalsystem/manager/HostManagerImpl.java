@@ -124,21 +124,14 @@ public class HostManagerImpl implements HostManager {
         saveToFile();
     }
 
-
     /**
      * Retrieves a host by their ID.
-     * @param hostId The ID of the host to retrieve
-     * @return The Host object
-     * @throws IllegalArgumentException if the host doesn't exist
+     * @param id The ID of the host to retrieve
+     * @return The Host object, or null if no host with the given ID exists
      */
-
     @Override
-    public Host get(String hostId) {
-        Host host = hosts.get(hostId);
-        if (host == null) {
-            throw new IllegalArgumentException("Host with ID " + hostId + " does not exist.");
-        }
-        return host;
+    public Host get(String id) {
+        return hosts.get(id);
     }
 
     /**
@@ -224,7 +217,7 @@ public class HostManagerImpl implements HostManager {
                         entity.getContactInformation()
                 })
                 .collect(Collectors.toList());
-        fileHandler.saveHosts(lines); // Use appropriate method name for each entity type
+        fileHandler.saveHosts(lines);
     }
 
     /**
@@ -243,7 +236,7 @@ public class HostManagerImpl implements HostManager {
                     parts[3]
             );
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            throw new IllegalArgumentException("Invalid date format: " + parts[2], e);
         }
     }
 }

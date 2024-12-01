@@ -206,16 +206,14 @@ public class TableFormatter {
         List<String> headers = Arrays.asList("ID", "Name", "Date of Birth", "Contact Info");
         List<List<String>> rows = new ArrayList<>();
 
-
         for (Owner owner : owners) {
             rows.add(Arrays.asList(
                     owner.getId(),
                     owner.getFullName(),
-                    owner.getDateOfBirth(),
+                    owner.getDateOfBirthString(),
                     owner.getContactInformation()
             ));
         }
-
 
         printDataTable(headers, rows, ANSI_CYAN);
     }
@@ -229,16 +227,14 @@ public class TableFormatter {
         List<String> headers = Arrays.asList("ID", "Name", "Date of Birth", "Contact Info");
         List<List<String>> rows = new ArrayList<>();
 
-
         for (Host host : hosts) {
             rows.add(Arrays.asList(
                     host.getId(),
                     host.getFullName(),
-                    host.getDateOfBirth(),
+                    host.getDateOfBirthString(),
                     host.getContactInformation()
             ));
         }
-
 
         printDataTable(headers, rows, ANSI_CYAN);
     }
