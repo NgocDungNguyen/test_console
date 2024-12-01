@@ -73,7 +73,7 @@ Data is persisted using a custom CSV-like format, with each entity type having i
 
 1. Clone the repository:
    ```
-   git clone https://github.com/NgocDungNguyen/test.git
+   git clone https://github.com/RMIT-Vietnam-Teaching/further-programming-assignment-1-build-a-console-app-NgocDungNguyen.git
    cd test
    ```
 
@@ -157,8 +157,8 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 For technical support or inquiries:
 
-- 📧 Email: support@rentalmanagementsystem.com
-- 🐛 Issue Tracker: [GitHub Issues](https://github.com/NgocDungNguyen/test/issues)
+- 📧 Email: s3978535@rmit.edu.vn
+- 🐛 Issue Tracker: [GitHub Issues](https://github.com/RMIT-Vietnam-Teaching/further-programming-assignment-1-build-a-console-app-NgocDungNguyen.git)
 
 ---
 
