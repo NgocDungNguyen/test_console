@@ -1,11 +1,12 @@
+/**
+ * @author <Nguyen Ngoc Dung - s3978535>
+ */
+
 package com.rentalsystem.ui;
 
 
 import com.rentalsystem.model.*;
 import org.jline.terminal.Terminal;
-import org.jline.utils.AttributedString;
-import org.jline.utils.AttributedStyle;
-
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -1,14 +1,11 @@
+/**
+ * @author <Nguyen Ngoc Dung - s3978535>
+ */
 package com.rentalsystem.model;
 
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-
-import static com.rentalsystem.util.FileHandler.DATE_FORMAT;
-
 
 /**
  * Represents a tenant in the rental system.

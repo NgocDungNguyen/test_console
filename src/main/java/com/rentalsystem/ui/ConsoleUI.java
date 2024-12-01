@@ -1,5 +1,8 @@
-package com.rentalsystem.ui;
+/**
+ * @author <Nguyen Ngoc Dung - s3978535>
+ */
 
+package com.rentalsystem.ui;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -12,13 +15,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.text.SimpleDateFormat;
 
-
 import com.rentalsystem.model.Payment;
 import com.rentalsystem.model.PropertyStatus;
 import com.rentalsystem.util.FileHandler;
-
-
-
 
 import org.jline.reader.Completer;
 import org.jline.reader.LineReader;
@@ -27,7 +26,6 @@ import org.jline.reader.impl.completer.AggregateCompleter;
 import org.jline.reader.impl.completer.StringsCompleter;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
-
 
 import com.rentalsystem.manager.HostManager;
 import com.rentalsystem.manager.HostManagerImpl;
@@ -49,7 +47,6 @@ import com.rentalsystem.model.Tenant;
 import com.rentalsystem.util.DateUtil;
 import com.rentalsystem.util.InputValidator;
 
-
 import static com.rentalsystem.util.InputValidator.isEmailTaken;
 
 
@@ -57,8 +54,6 @@ import static com.rentalsystem.util.InputValidator.isEmailTaken;
  * ConsoleUI class handles the user interface for the Rental Management System.
  * It provides methods for displaying menus, handling user input, and interacting with the system's managers.
  */
-
-
 public class ConsoleUI {
     // Manager instances for handling different entities
     private RentalManager rentalManager;
@@ -160,8 +155,6 @@ public class ConsoleUI {
      * Initializes the terminal, line reader, and table formatter.
      * @throws IOException if there's an error initializing the terminal
      */
-
-
     public ConsoleUI() throws IOException {
         terminal = TerminalBuilder.builder().system(true).build();
         List<Completer> completers = new ArrayList<>();
@@ -176,13 +169,10 @@ public class ConsoleUI {
         fileHandler = new FileHandler();  // Initialize fileHandler here
     }
 
-
     /**
      * Initializes all managers and loads data from files.
      * Displays a progress bar during initialization.
      */
-
-
     private void initializeManagers() {
         ProgressDisplay progressDisplay = new ProgressDisplay(terminal);
         System.out.println("Initializing system...");
@@ -247,11 +237,9 @@ public class ConsoleUI {
 
 
     /**
-     * Initializes all managers and loads data from files.
-     * Displays a progress bar during initialization.
+     * Starts the main application loop.
+     * Displays the welcome message, initializes managers, and handles the main menu.
      */
-
-
     public void start() {
         clearScreen();
         printWelcomeMessage();
@@ -291,11 +279,9 @@ public class ConsoleUI {
 
 
     /**
-     * Initializes all managers and loads data from files.
-     * Displays a progress bar during initialization.
+     * Handles saving data to files.
+     * Displays a spinner while saving is in progress.
      */
-
-
     private void handleSave() {
         LoaderSpinner spinner = new LoaderSpinner();
         System.out.print("Saving data ");
@@ -321,19 +307,21 @@ public class ConsoleUI {
                 e.printStackTrace();
             }
         }
-
-
         spinner.stop();
         System.out.println("Data saved successfully.");
     }
 
-
+    /**
+     * Clears the console screen.
+     */
     private void clearScreen() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
 
-
+    /**
+     * Prints the welcome message with ASCII art.
+     */
     private void printWelcomeMessage() {
         System.out.println(TableFormatter.ANSI_CYAN);
         System.out.println("═".repeat(80));
@@ -352,7 +340,6 @@ public class ConsoleUI {
      * @return The user's menu choice.
      */
 
-
     private String showMainMenu() {
         List<String> options = Arrays.asList(
                 "Manage Rental Agreements",
@@ -368,7 +355,10 @@ public class ConsoleUI {
         return readUserInput("Enter your choice: ");
     }
 
-
+    /**
+     * Prints centered ASCII art.
+     * @param ascii The ASCII art to be centered and printed
+     */
     private void printCenteredASCII(String[] ascii) {
         int maxWidth = Arrays.stream(ascii).mapToInt(String::length).max().orElse(0);
         for (String line : ascii) {
@@ -377,13 +367,20 @@ public class ConsoleUI {
         }
     }
 
-
+    /**
+     * Centers text within a given width.
+     * @param text The text to be centered
+     * @param width The width to center within
+     * @return The centered text
+     */
     private String centerText(String text, int width) {
         int padding = (width - text.length()) / 2;
         return " ".repeat(padding) + text + " ".repeat(width - text.length() - padding);
     }
 
-
+    /**
+     * Prints the status bar with current user, date, and time.
+     */
     private void printStatusBar() {
         String currentUser = "Admin";
         String currentDate = LocalDate.now().toString();
@@ -409,7 +406,6 @@ public class ConsoleUI {
      * Handles the Rental Agreements submenu.
      * Allows adding, updating, deleting, listing, and searching rental agreements.
      */
-
 
     private void handleRentalAgreements() {
         while (true) {
@@ -453,8 +449,6 @@ public class ConsoleUI {
      * Handles the Tenants submenu.
      * Allows adding, updating, deleting, listing, and searching tenants.
      */
-
-
     private void handleTenants() {
         while (true) {
             clearScreen();
@@ -496,8 +490,6 @@ public class ConsoleUI {
      * Handles the Owners submenu.
      * Allows adding, updating, deleting, listing, and searching owners.
      */
-
-
     private void handleOwners() {
         while (true) {
             clearScreen();
@@ -539,8 +531,6 @@ public class ConsoleUI {
      * Handles the Hosts submenu.
      * Allows adding, updating, deleting, listing, and searching hosts.
      */
-
-
     private void handleHosts() {
         while (true) {
             clearScreen();
@@ -582,8 +572,6 @@ public class ConsoleUI {
      * Handles the Properties submenu.
      * Allows adding, updating, deleting, listing, and searching properties.
      */
-
-
     private void handleProperties() {
         while (true) {
             clearScreen();
@@ -625,8 +613,6 @@ public class ConsoleUI {
      * Handles the Reports submenu.
      * Allows generating various reports.
      */
-
-
     private void handleReports() {
         while (true) {
             clearScreen();
@@ -676,8 +662,6 @@ public class ConsoleUI {
     /**
      * Generates and displays a property status report.
      */
-
-
     private void generatePropertyStatusReport() {
         List<Property> properties = propertyManager.getAll();
         List<String> headers = Arrays.asList("Property ID", "Type", "Address", "Status", "Owner ID - Name", "Host ID - Name");
@@ -702,8 +686,6 @@ public class ConsoleUI {
     /**
      * Generates and displays a tenant payment history report.
      */
-
-
     private void generateTenantPaymentHistoryReport() {
         String tenantId = readUserInput("Enter tenant ID: ");
         Tenant tenant = tenantManager.get(tenantId);
@@ -730,7 +712,11 @@ public class ConsoleUI {
         tableFormatter.printDataTable(headers, data, TableFormatter.ANSI_CYAN);
     }
 
-
+    /**
+     * Reads user input from the console.
+     * @param prompt The prompt to display to the user
+     * @return The user's input as a string
+     */
     private String readUserInput(String prompt) {
         System.out.print(prompt);
         return reader.readLine().trim();
@@ -740,8 +726,6 @@ public class ConsoleUI {
     /**
      * Generates and displays a host performance report.
      */
-
-
     private void generateHostPerformanceReport() {
         List<Host> hosts = hostManager.getAll();
         List<String> headers = Arrays.asList("Host ID", "Name", "Managed Properties", "Active Agreements", "Total Rent");
@@ -767,13 +751,21 @@ public class ConsoleUI {
         tableFormatter.printDataTable(headers, data, TableFormatter.ANSI_CYAN);
     }
 
-
+    /**
+     * Reads user input from the console, allowing empty input.
+     * @param prompt The prompt to display to the user
+     * @return The user's input as a string, or an empty string if no input is provided
+     */
     private String readUserInputAllowEmpty(String prompt) {
         System.out.print(prompt);
         return reader.readLine();
     }
 
-
+    /**
+     * Reads user input from the console, allowing escape (ESC key) to return null.
+     * @param prompt The prompt to display to the user
+     * @return The user's input as a string, or null if ESC was pressed
+     */
     private String readUserInputAllowEsc(String prompt) {
         System.out.print(prompt);
         String input = reader.readLine().trim();
@@ -783,9 +775,11 @@ public class ConsoleUI {
         return input;
     }
 
-
-
-
+    /**
+     * Prompts the user to input a property ID and returns the corresponding Property object.
+     * @return The selected Property object
+     * @throws RuntimeException if the property is not found
+     */
     private Property getUserInputProperty() {
         String id = "";
         while (id.isBlank()) {
@@ -799,6 +793,12 @@ public class ConsoleUI {
         }
         throw new RuntimeException("THIS NEVER HAPPEN");
     }
+
+    /**
+     * Prompts the user to input an owner ID and returns the corresponding Owner object.
+     * @return The selected Owner object
+     * @throws RuntimeException if the owner is not found
+     */
     private Owner getUserInputOwner() {
         String id = "";
         while (id.isBlank()) {
@@ -812,6 +812,12 @@ public class ConsoleUI {
         }
         throw new RuntimeException("THIS NEVER HAPPEN");
     }
+
+    /**
+     * Prompts the user to input a host ID and returns the corresponding Host object.
+     * @return The selected Host object
+     * @throws RuntimeException if the host is not found
+     */
     private Host getUserInputHost() {
         String id = "";
         while (id.isBlank()) {
@@ -825,6 +831,11 @@ public class ConsoleUI {
         }
         throw new RuntimeException("THIS NEVER HAPPEN");
     }
+
+    /**
+     * Prompts the user to input a tenant ID and returns the corresponding Tenant object.
+     * @return The selected Tenant object, or null if not found
+     */
     private Tenant getUserInputTenant() {
         String tenantId = readUserInput("Enter tenant ID: ");
         Tenant tenant = tenantManager.get(tenantId);
@@ -836,13 +847,9 @@ public class ConsoleUI {
     }
 
 
-
-
     /**
      * Adds a new rental agreement to the system.
      */
-
-
     private void addRentalAgreement() {
         String agreementId = null;
         while (agreementId == null) {
@@ -909,12 +916,17 @@ public class ConsoleUI {
         }
     }
 
-
+    /**
+     * Logs an error message with red color.
+     * @param error The error message to log
+     */
     private void logError(String error) {
         System.out.println(TableFormatter.ANSI_RED + error + TableFormatter.ANSI_RESET);
     }
 
-
+    /**
+     * Adds or removes a tenant to/from an existing rental agreement.
+     */
     private void addRemoveTenantToExistingAgreement() {
         // Prompt user for action (add or remove tenant)
         String action = readUserInput("Would you like to 'Add' or 'Remove' a tenant? (type 'Add' or 'Remove', or 'back' to return): ");
@@ -974,8 +986,6 @@ public class ConsoleUI {
     /**
      * Updates an existing rental agreement in the system.
      */
-
-
     private void updateRentalAgreement() {
         while (true) {
             String id = readUserInputAllowEsc("Enter agreement ID to update (press ESC to return): ");
@@ -1033,12 +1043,9 @@ public class ConsoleUI {
     }
 
 
-
     /**
      * Deletes a rental agreement from the system.
      */
-
-
     private void deleteRentalAgreement() {
         while (true) {
             String agreementId = readUserInput("Enter agreement ID to delete (or 'back' to return): ");
@@ -1072,12 +1079,9 @@ public class ConsoleUI {
         }
     }
 
-
     /**
      * Lists all rental agreements, sorted by a specified criteria.
      */
-
-
     private void listRentalAgreements() {
         String sortBy = readUserInput("Enter sort criteria (id/propertyid/tenantname/ownername/hostname/startdate/enddate/rentamount/status): ");
         try {
@@ -1092,8 +1096,6 @@ public class ConsoleUI {
     /**
      * Searches for rental agreements based on a keyword.
      */
-
-
     private void searchRentalAgreements() {
         String keyword = readUserInput("Enter search keyword: ");
         List<RentalAgreement> results = rentalManager.searchRentalAgreements(keyword);

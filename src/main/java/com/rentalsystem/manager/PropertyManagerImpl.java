@@ -1,3 +1,7 @@
+/**
+ * @author <Nguyen Ngoc Dung - s3978535>
+ */
+
 package com.rentalsystem.manager;
 
 import com.rentalsystem.model.*;
@@ -6,6 +10,10 @@ import com.rentalsystem.util.FileHandler;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Implementation of the PropertyManager interface.
+ * Manages Property entities in the system, providing CRUD operations and additional functionalities.
+ */
 public class PropertyManagerImpl implements PropertyManager {
     private Map<String, Property> properties;
     private FileHandler fileHandler;
@@ -14,11 +22,23 @@ public class PropertyManagerImpl implements PropertyManager {
     private OwnerManager ownerManager;
     private RentalManager rentalManager;
 
+    /**
+     * Constructs a new PropertyManagerImpl with the given FileHandler.
+     * Initializes the properties map.
+     * @param fileHandler The FileHandler to use for data persistence
+     */
     public PropertyManagerImpl(FileHandler fileHandler) {
         this.fileHandler = fileHandler;
         this.properties = new HashMap<>();
     }
 
+    /**
+     * Sets the dependencies required for the PropertyManager.
+     * @param hostManager The HostManager instance
+     * @param tenantManager The TenantManager instance
+     * @param ownerManager The OwnerManager instance
+     * @param rentalManager The RentalManager instance
+     */
     public void setDependencies(HostManager hostManager, TenantManager tenantManager, OwnerManager ownerManager, RentalManager rentalManager) {
         this.hostManager = hostManager;
         this.tenantManager = tenantManager;
@@ -26,6 +46,10 @@ public class PropertyManagerImpl implements PropertyManager {
         this.rentalManager = rentalManager;
     }
 
+    /**
+     * Loads property data from the file system and sets up relationships with owners and hosts.
+     * Throws an IllegalStateException if dependencies are not set.
+     */
     @Override
     public void load() {
         if (hostManager == null || tenantManager == null || ownerManager == null || rentalManager == null) {
@@ -58,6 +82,11 @@ public class PropertyManagerImpl implements PropertyManager {
         }
     }
 
+    /**
+     * Adds a new property to the system.
+     * @param property The Property object to be added
+     * @throws IllegalArgumentException if a property with the same ID already exists
+     */
     @Override
     public void add(Property property) {
         if (properties.containsKey(property.getPropertyId())) {
@@ -68,6 +97,12 @@ public class PropertyManagerImpl implements PropertyManager {
         saveToFile();
     }
 
+    /**
+     * Updates an existing property in the system.
+     * @param property The Property object to be updated
+     * @throws IllegalArgumentException if the property doesn't exist
+     */
+
     @Override
     public void update(Property property) {
         if (!properties.containsKey(property.getPropertyId())) {
@@ -77,6 +112,11 @@ public class PropertyManagerImpl implements PropertyManager {
         saveToFile();
     }
 
+    /**
+     * Deletes a property from the system and updates related entities.
+     * @param propertyId The ID of the property to be deleted
+     * @throws IllegalArgumentException if the property doesn't exist
+     */
     @Override
     public void delete(String propertyId) {
         Property property = properties.remove(propertyId);
@@ -93,15 +133,33 @@ public class PropertyManagerImpl implements PropertyManager {
         saveToFile();
     }
 
+
+    /**
+     * Retrieves a property by its ID.
+     * @param propertyId The ID of the property to retrieve
+     * @return The Property object, or null if not found
+     */
     @Override
     public Property get(String propertyId) {
         return properties.get(propertyId);
     }
 
+    /**
+     * Retrieves all properties in the system.
+     * @return A list of all Property objects
+     */
+
     @Override
     public List<Property> getAll() {
         return new ArrayList<>(properties.values());
     }
+
+    /**
+     * Retrieves a sorted list of properties based on the specified criteria.
+     * @param sortBy The criteria to sort by (id, type, address, price, status, or owner)
+     * @return A sorted list of Property objects
+     * @throws IllegalArgumentException if an invalid sort criteria is provided
+     */
 
     @Override
     public List<Property> getSorted(String sortBy) {
@@ -131,15 +189,31 @@ public class PropertyManagerImpl implements PropertyManager {
         return sortedList;
     }
 
+    /**
+     * Gets the total number of properties in the system.
+     * @return The total number of properties
+     */
+
     @Override
     public int getTotalProperties() {
         return properties.size();
     }
 
+    /**
+     * Gets the number of occupied (rented) properties in the system.
+     * @return The number of occupied properties
+     */
     @Override
     public int getOccupiedProperties() {
         return (int) getAll().stream().filter(p -> p.getStatus() == PropertyStatus.RENTED).count();
     }
+
+    /**
+     * Searches for properties based on a keyword.
+     * The search is case-insensitive and looks in the property ID, address, and owner's full name.
+     * @param keyword The search keyword
+     * @return A list of Property objects matching the search criteria
+     */
 
     @Override
     public List<Property> search(String keyword) {
@@ -151,12 +225,23 @@ public class PropertyManagerImpl implements PropertyManager {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves a list of all available properties.
+     * @return A list of Property objects with AVAILABLE status
+     */
+
     @Override
     public List<Property> getAvailableProperties() {
         return getAll().stream()
                 .filter(property -> property.getStatus() == PropertyStatus.AVAILABLE)
                 .collect(Collectors.toList());
     }
+
+    /**
+     * Converts a Property object to a string array for saving to file.
+     * @param property The Property object to convert
+     * @return A string array representation of the property
+     */
 
     private String[] saveProperty(Property property) {
         List<String> propertyData = new ArrayList<>(Arrays.asList(
@@ -195,6 +280,9 @@ public class PropertyManagerImpl implements PropertyManager {
         return propertyData.toArray(new String[0]);
     }
 
+    /**
+     * Saves the current state of properties to the file system.
+     */
     @Override
     public void saveToFile() {
         List<String[]> propertyLines = new ArrayList<>();
@@ -205,6 +293,14 @@ public class PropertyManagerImpl implements PropertyManager {
 
         fileHandler.saveProperties(propertyLines);
     }
+
+
+    /**
+     * Creates a Property object from a string array representation.
+     * @param parts The string array containing property data
+     * @return The created Property object
+     * @throws RuntimeException if there's an error parsing the property type
+     */
 
     @Override
     public Property fromString(String[] parts) {

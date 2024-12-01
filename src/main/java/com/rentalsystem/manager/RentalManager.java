@@ -1,5 +1,8 @@
-package com.rentalsystem.manager;
+/**
+ * @author <Nguyen Ngoc Dung - s3978535>
+ */
 
+package com.rentalsystem.manager;
 
 import com.rentalsystem.model.Property;
 import com.rentalsystem.model.RentalAgreement;

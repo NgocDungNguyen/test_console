@@ -1,5 +1,8 @@
-package com.rentalsystem.model;
+/**
+ * @author <Nguyen Ngoc Dung - s3978535>
+ */
 
+package com.rentalsystem.model;
 
 /**
  * Represents a commercial property in the rental system.

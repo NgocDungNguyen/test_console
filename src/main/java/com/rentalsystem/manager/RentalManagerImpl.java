@@ -1,3 +1,7 @@
+/**
+ * @author <Nguyen Ngoc Dung - s3978535>
+ */
+
 package com.rentalsystem.manager;
 
 import com.rentalsystem.model.*;
@@ -9,6 +13,10 @@ import java.util.stream.Collectors;
 
 import static com.rentalsystem.util.FileHandler.DATE_FORMAT;
 
+/**
+ * Implementation of the RentalManager interface.
+ * Manages RentalAgreement entities in the system, providing CRUD operations and additional functionalities.
+ */
 public class RentalManagerImpl implements RentalManager {
     private final Map<String, RentalAgreement> rentalAgreements;
     private final FileHandler fileHandler;
@@ -17,11 +25,23 @@ public class RentalManagerImpl implements RentalManager {
     private HostManager hostManager;
     private OwnerManager ownerManager;
 
+    /**
+     * Constructs a new RentalManagerImpl with the given FileHandler.
+     * Initializes the rentalAgreements map.
+     * @param fileHandler The FileHandler to use for data persistence
+     */
     public RentalManagerImpl(FileHandler fileHandler) {
         this.fileHandler = fileHandler;
         this.rentalAgreements = new HashMap<>();
     }
 
+    /**
+     * Sets the dependencies required for the RentalManager.
+     * @param tenantManager The TenantManager instance
+     * @param propertyManager The PropertyManager instance
+     * @param hostManager The HostManager instance
+     * @param ownerManager The OwnerManager instance
+     */
     public void setDependencies(TenantManager tenantManager, PropertyManager propertyManager, HostManager hostManager, OwnerManager ownerManager) {
         this.tenantManager = tenantManager;
         this.propertyManager = propertyManager;
@@ -29,6 +49,11 @@ public class RentalManagerImpl implements RentalManager {
         this.ownerManager = ownerManager;
     }
 
+
+    /**
+     * Loads rental agreement data from the file system.
+     * Throws an IllegalStateException if dependencies are not set.
+     */
     @Override
     public void load() {
         if (tenantManager == null || propertyManager == null || hostManager == null || ownerManager == null) {
@@ -41,6 +66,11 @@ public class RentalManagerImpl implements RentalManager {
         }
     }
 
+
+    /**
+     * Updates the status of a rental agreement based on its dates.
+     * @param agreement The RentalAgreement to update
+     */
     private void updateAgreementStatus(RentalAgreement agreement) {
         Date currentDate = new Date();
         if (agreement.getStartDate().after(currentDate)) {
@@ -52,6 +82,10 @@ public class RentalManagerImpl implements RentalManager {
         }
     }
 
+
+    /**
+     * Updates the statuses of all rental agreements in the system.
+     */
     public void updateAgreementStatuses() {
         Date currentDate = new Date();
         for (RentalAgreement agreement : rentalAgreements.values()) {
@@ -64,6 +98,12 @@ public class RentalManagerImpl implements RentalManager {
         saveToFile();
     }
 
+
+    /**
+     * Adds a new rental agreement to the system.
+     * @param agreement The RentalAgreement to be added
+     * @throws IllegalArgumentException if an agreement with the same ID already exists
+     */
     @Override
     public void add(RentalAgreement agreement) {
         if (rentalAgreements.containsKey(agreement.getAgreementId())) {
@@ -88,6 +128,13 @@ public class RentalManagerImpl implements RentalManager {
         }
         saveToFile();
     }
+
+
+    /**
+     * Updates an existing rental agreement in the system.
+     * @param agreement The RentalAgreement to be updated
+     * @throws IllegalArgumentException if the agreement doesn't exist
+     */
 
     @Override
     public void update(RentalAgreement agreement) {
@@ -129,6 +176,11 @@ public class RentalManagerImpl implements RentalManager {
         saveToFile();
     }
 
+    /**
+     * Deletes a rental agreement from the system.
+     * @param agreementId The ID of the agreement to be deleted
+     * @throws IllegalArgumentException if the agreement doesn't exist
+     */
     @Override
     public void delete(String agreementId) {
         RentalAgreement agreement = rentalAgreements.remove(agreementId);
@@ -154,16 +206,33 @@ public class RentalManagerImpl implements RentalManager {
         saveToFile();
     }
 
+
+    /**
+     * Retrieves a rental agreement by its ID.
+     * @param agreementId The ID of the agreement to retrieve
+     * @return The RentalAgreement object, or null if not found
+     */
+
     @Override
     public RentalAgreement get(String agreementId) {
         return rentalAgreements.get(agreementId);
     }
 
+    /**
+     * Retrieves all rental agreements in the system.
+     * @return A list of all RentalAgreement objects
+     */
     @Override
     public List<RentalAgreement> getAll() {
         return new ArrayList<>(rentalAgreements.values());
     }
 
+    /**
+     * Retrieves a sorted list of rental agreements based on the specified criteria.
+     * @param sortBy The criteria to sort by
+     * @return A sorted list of RentalAgreement objects
+     * @throws IllegalArgumentException if an invalid sort criteria is provided
+     */
     @Override
     public List<RentalAgreement> getSorted(String sortBy) {
         List<RentalAgreement> sortedList = getAll();
@@ -201,6 +270,11 @@ public class RentalManagerImpl implements RentalManager {
         return sortedList;
     }
 
+    /**
+     * Adds a sub-tenant to an existing rental agreement.
+     * @param agreementId The ID of the rental agreement
+     * @param subTenantId The ID of the sub-tenant to be added
+     */
     @Override
     public void addSubTenant(String agreementId, String subTenantId) {
         RentalAgreement agreement = get(agreementId);
@@ -220,6 +294,12 @@ public class RentalManagerImpl implements RentalManager {
         System.out.println("Sub-tenant added successfully to rental agreement " + agreementId);
     }
 
+    /**
+     * Removes a sub-tenant from an existing rental agreement.
+     * @param agreementId The ID of the rental agreement
+     * @param subTenantId The ID of the sub-tenant to be removed
+     */
+
     @Override
     public void removeSubTenant(String agreementId, String subTenantId) {
         RentalAgreement agreement = get(agreementId);
@@ -233,6 +313,10 @@ public class RentalManagerImpl implements RentalManager {
         System.out.println("Sub-tenant with ID " + subTenantId + " removed from rental agreement " + agreementId);
     }
 
+    /**
+     * Retrieves all active rental agreements.
+     * @return A list of active RentalAgreement objects
+     */
     @Override
     public List<RentalAgreement> getActiveRentalAgreements() {
         Date currentDate = new Date();
@@ -241,6 +325,10 @@ public class RentalManagerImpl implements RentalManager {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves all expired rental agreements.
+     * @return A list of expired RentalAgreement objects
+     */
     @Override
     public List<RentalAgreement> getExpiredRentalAgreements() {
         Date currentDate = new Date();
@@ -249,6 +337,10 @@ public class RentalManagerImpl implements RentalManager {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Calculates the total rental income from all active agreements.
+     * @return The total rental income
+     */
     @Override
     public double getTotalRentalIncome() {
         return getAll().stream()
@@ -257,11 +349,20 @@ public class RentalManagerImpl implements RentalManager {
                 .sum();
     }
 
+    /**
+     * Gets the total number of active rental agreements.
+     * @return The number of active agreements
+     */
     @Override
     public int getTotalActiveAgreements() {
         return getActiveRentalAgreements().size();
     }
 
+    /**
+     * Searches for rental agreements based on a keyword.
+     * @param keyword The search keyword
+     * @return A list of RentalAgreement objects matching the search criteria
+     */
     @Override
     public List<RentalAgreement> searchRentalAgreements(String keyword) {
         final String lowercaseKeyword = keyword.toLowerCase();
@@ -274,6 +375,13 @@ public class RentalManagerImpl implements RentalManager {
                 .collect(Collectors.toList());
     }
 
+
+
+    /**
+     * Extends the end date of a rental agreement.
+     * @param agreementId The ID of the agreement to extend
+     * @param extensionDays The number of days to extend the agreement by
+     */
     @Override
     public void extendRentalAgreement(String agreementId, int extensionDays) {
         RentalAgreement agreement = get(agreementId);
@@ -283,6 +391,11 @@ public class RentalManagerImpl implements RentalManager {
         agreement.setEndDate(calendar.getTime());
         saveToFile();
     }
+
+    /**
+     * Terminates a rental agreement by setting its end date to the current date and status to COMPLETED.
+     * @param agreementId The ID of the agreement to terminate
+     */
 
     @Override
     public void terminateRentalAgreement(String agreementId) {
@@ -298,6 +411,12 @@ public class RentalManagerImpl implements RentalManager {
         saveToFile();
     }
 
+    /**
+     * Finds an active rental agreement for a given property.
+     * @param property The property to find an active agreement for
+     * @return The active RentalAgreement, or null if not found
+     */
+
     public RentalAgreement findActiveRentalAgreement(Property property) {
         return getAll().stream()
                 .filter(a -> a.getProperty().getPropertyId().equals(property.getPropertyId()) && a.getStatus() == RentalAgreement.Status.ACTIVE)
@@ -305,6 +424,10 @@ public class RentalManagerImpl implements RentalManager {
                 .orElse(null);
     }
 
+
+    /**
+     * Saves the current state of rental agreements to the file system.
+     */
     @Override
     public void saveToFile() {
         List<String[]> rentalAgreementLines = new ArrayList<>();
@@ -332,6 +455,12 @@ public class RentalManagerImpl implements RentalManager {
         fileHandler.saveRentalAgreements(rentalAgreementLines);
     }
 
+    /**
+     * Creates a RentalAgreement object from a string array representation.
+     * @param parts The string array containing rental agreement data
+     * @return The created RentalAgreement object
+     * @throws RuntimeException if there's an error parsing the date
+     */
     @Override
     public RentalAgreement fromString(String[] parts) {
         Property property = propertyManager.get(parts[1]);

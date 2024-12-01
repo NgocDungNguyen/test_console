@@ -1,5 +1,7 @@
+/**
+ * @author <Nguyen Ngoc Dung - s3978535>
+ */
 package com.rentalsystem.util;
-
 
 import org.jline.reader.LineReader;
 import java.text.ParseException;

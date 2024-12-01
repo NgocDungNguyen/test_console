@@ -1,5 +1,8 @@
-package com.rentalsystem.util;
+/**
+ * @author <Nguyen Ngoc Dung - s3978535>
+ */
 
+package com.rentalsystem.util;
 
 import java.util.List;
 import java.util.regex.Pattern;

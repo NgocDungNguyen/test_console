@@ -1,5 +1,8 @@
-package com.rentalsystem.config;
+/**
+ * @author <Nguyen Ngoc Dung - s3978535>
+ */
 
+package com.rentalsystem.config;
 
 import java.io.IOException;
 import java.util.logging.*;

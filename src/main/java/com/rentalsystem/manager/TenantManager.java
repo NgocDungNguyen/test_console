@@ -1,10 +1,9 @@
+/**
+ * @author <Nguyen Ngoc Dung - s3978535>
+ */
 package com.rentalsystem.manager;
 
-
 import java.util.List;
-
-
-import com.rentalsystem.model.Payment;
 import com.rentalsystem.model.Tenant;
 
 
