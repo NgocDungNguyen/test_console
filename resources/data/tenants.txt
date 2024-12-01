@@ -13,8 +13,3 @@
 "T013","Bella Moore","1993-09-03","bellamoore@email.com"
 "T014","Charlie Nelson","1988-07-12","charlienelson@email.com"
 "T015","Daisy Owens","1990-05-26","daisyowens@email.com"
-"T016","Ethan Parker","1986-11-08","ethanparker@email.com"
-"T017","Fiona Quinn","1992-04-19","fionaquinn@email.com"
-"T018","Greg Roberts","1989-01-30","gregroberts@email.com"
-"T019","Hannah Scott","1991-08-07","hannahscott@email.com"
-"T020","Ian Turner","1987-12-14","ianturner@email.com"

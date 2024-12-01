@@ -1,10 +1,12 @@
 package com.rentalsystem.model;
 
+
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+
 
 /**
  * Represents a property in the rental system.
@@ -18,6 +20,7 @@ public class Property {
     private Set<Host> hosts;
     private List<Tenant> tenants;
     private List<RentalAgreement> rentalHistory;
+
 
     /**
      * Constructs a new Property.
@@ -38,43 +41,54 @@ public class Property {
         this.rentalHistory = new ArrayList<>();
     }
 
+
     // Getters and setters
+
 
     public String getPropertyId() {
         return propertyId;
     }
 
+
     public void setPropertyId(String propertyId) {
         this.propertyId = propertyId;
     }
+
 
     public String getAddress() {
         return address;
     }
 
+
     public void setAddress(String address) {
         this.address = address;
     }
+
 
     public double getPrice() {
         return price;
     }
 
+
     public void setPrice(double price) {
         this.price = price;
     }
+
 
     public PropertyStatus getStatus() {
         return status;
     }
 
+
     public void setStatus(PropertyStatus status) {
         this.status = status;
     }
 
+
     public Owner getOwner() {
         return owner;
     }
+
 
     /**
      * Sets the owner of the property and updates the owner's owned properties.
@@ -90,9 +104,11 @@ public class Property {
         }
     }
 
+
     public Set<Host> getHosts() {
         return hosts;
     }
+
 
     /**
      * Adds a host to the property and updates the host's managed properties.
@@ -103,6 +119,7 @@ public class Property {
         newHost.addManagedProperty(this);
     }
 
+
     /**
      * Removes a host from the property and updates the host's managed properties.
      * @param host The host to be removed
@@ -112,9 +129,11 @@ public class Property {
         host.removeManagedProperty(this);
     }
 
+
     public List<Tenant> getTenants() {
         return new ArrayList<>(tenants);
     }
+
 
     /**
      * Adds a tenant to the property.
@@ -126,6 +145,7 @@ public class Property {
         }
     }
 
+
     /**
      * Removes a tenant from the property.
      * @param tenant The tenant to be removed
@@ -133,6 +153,7 @@ public class Property {
     public void removeTenant(Tenant tenant) {
         tenants.remove(tenant);
     }
+
 
     /**
      * Adds a rental agreement to the property's rental history.
@@ -142,6 +163,7 @@ public class Property {
         rentalHistory.add(agreement);
     }
 
+
     /**
      * Retrieves the rental history of the property.
      * @return A new ArrayList containing the rental history
@@ -149,6 +171,7 @@ public class Property {
     public List<RentalAgreement> getRentalHistory() {
         return new ArrayList<>(rentalHistory);
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -158,10 +181,12 @@ public class Property {
         return Objects.equals(propertyId, property.propertyId);
     }
 
+
     @Override
     public int hashCode() {
         return Objects.hash(propertyId);
     }
+
 
     @Override
     public String toString() {

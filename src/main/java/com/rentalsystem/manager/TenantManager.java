@@ -1,9 +1,12 @@
 package com.rentalsystem.manager;
 
+
 import java.util.List;
+
 
 import com.rentalsystem.model.Payment;
 import com.rentalsystem.model.Tenant;
+
 
 /**
  * Interface for managing Tenant entities in the system.
@@ -16,17 +19,20 @@ public interface TenantManager extends CrudManager<Tenant> {
      */
     void add(Tenant tenant);
 
+
     /**
      * Updates an existing tenant in the system.
      * @param tenant The tenant to be updated
      */
     void update(Tenant tenant);
 
+
     /**
      * Deletes a tenant from the system based on its ID.
      * @param id The ID of the tenant to be deleted
      */
     void delete(String id);
+
 
     /**
      * Retrieves a tenant from the system based on its ID.
@@ -35,11 +41,13 @@ public interface TenantManager extends CrudManager<Tenant> {
      */
     Tenant get(String id);
 
+
     /**
      * Retrieves all tenants from the system.
      * @return A list of all tenants
      */
     List<Tenant> getAll();
+
 
     /**
      * Searches for tenants based on a keyword.
@@ -48,12 +56,14 @@ public interface TenantManager extends CrudManager<Tenant> {
      */
     List<Tenant> search(String keyword);
 
+
     /**
      * Checks if an email is already taken by any tenant.
      * @param email The email to check
      * @return true if the email is taken, false otherwise
      */
     boolean isEmailTaken(String email);
+
 
     /**
      * Retrieves a tenant from the system based on their email.
@@ -62,12 +72,14 @@ public interface TenantManager extends CrudManager<Tenant> {
      */
     Tenant getByEmail(String email);
 
+
     /**
      * Retrieves a sorted list of all tenants based on a specified criteria.
      * @param sortBy The criteria to sort by
      * @return A sorted list of all tenants
      */
     List<Tenant> getSorted(String sortBy);
+
 
     /**
      * Loads payments for all tenants from file.

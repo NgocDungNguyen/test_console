@@ -1,13 +1,16 @@
 package com.rentalsystem.config;
 
+
 import java.io.IOException;
 import java.util.logging.*;
+
 
 /**
  * Configuration class for setting up the application logger.
  */
 public class LoggerConfig {
     private static final Logger LOGGER = Logger.getLogger(LoggerConfig.class.getName());
+
 
     // Static initializer to set up the logger
     static {
@@ -20,6 +23,7 @@ public class LoggerConfig {
             // Consider throwing a runtime exception here
         }
     }
+
 
     /**
      * Retrieves the configured logger instance.

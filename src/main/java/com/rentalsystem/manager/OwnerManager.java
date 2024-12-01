@@ -1,7 +1,9 @@
 package com.rentalsystem.manager;
 
+
 import com.rentalsystem.model.Owner;
 import java.util.List;
+
 
 /**
  * Interface for managing Owner entities in the system.
@@ -14,17 +16,20 @@ public interface OwnerManager extends CrudManager<Owner> {
      */
     void add(Owner owner);
 
+
     /**
      * Updates an existing owner in the system.
      * @param owner The owner to be updated
      */
     void update(Owner owner);
 
+
     /**
      * Deletes an owner from the system based on its ID.
      * @param ownerId The ID of the owner to be deleted
      */
     void delete(String ownerId);
+
 
     /**
      * Retrieves an owner from the system based on its ID.
@@ -33,11 +38,13 @@ public interface OwnerManager extends CrudManager<Owner> {
      */
     Owner get(String ownerId);
 
+
     /**
      * Retrieves all owners from the system.
      * @return A list of all owners
      */
     List<Owner> getAll();
+
 
     /**
      * Searches for owners based on a keyword.
@@ -45,6 +52,7 @@ public interface OwnerManager extends CrudManager<Owner> {
      * @return A list of owners matching the search criteria
      */
     List<Owner> search(String keyword);
+
 
     /**
      * Retrieves a sorted list of all owners based on a specified criteria.

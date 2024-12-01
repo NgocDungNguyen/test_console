@@ -1,7 +1,9 @@
 package com.rentalsystem.model;
 
+
 import java.util.ArrayList;
 import java.util.List;
+
 
 /**
  * Represents a residential property in the rental system.
@@ -11,6 +13,7 @@ public class ResidentialProperty extends Property {
     private int numberOfBedrooms;
     private boolean hasGarden;
     private boolean isPetFriendly;
+
 
     /**
      * Constructs a new ResidentialProperty.
@@ -37,6 +40,7 @@ public class ResidentialProperty extends Property {
         this.isPetFriendly = isPetFriendly;
     }
 
+
     /**
      * Constructs a ResidentialProperty from an existing Property, adding residential-specific attributes.
      * @param p Existing Property object
@@ -51,6 +55,7 @@ public class ResidentialProperty extends Property {
         this.isPetFriendly = isPetFriendly;
     }
 
+
     /**
      * Retrieves the list of sub-tenants for this residential property.
      * @return A new ArrayList of sub-tenants (currently not implemented)
@@ -59,31 +64,39 @@ public class ResidentialProperty extends Property {
         return new ArrayList<>(); // Implement this method properly
     }
 
+
     // Getters and setters
+
 
     public int getNumberOfBedrooms() {
         return numberOfBedrooms;
     }
 
+
     public void setNumberOfBedrooms(int numberOfBedrooms) {
         this.numberOfBedrooms = numberOfBedrooms;
     }
+
 
     public boolean hasGarden() {
         return hasGarden;
     }
 
+
     public void setHasGarden(boolean hasGarden) {
         this.hasGarden = hasGarden;
     }
+
 
     public boolean isPetFriendly() {
         return isPetFriendly;
     }
 
+
     public void setPetFriendly(boolean petFriendly) {
         isPetFriendly = petFriendly;
     }
+
 
     @Override
     public String toString() {

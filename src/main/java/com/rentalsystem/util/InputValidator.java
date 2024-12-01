@@ -1,10 +1,13 @@
 package com.rentalsystem.util;
 
+
 import java.util.List;
 import java.util.regex.Pattern;
 
+
 import com.rentalsystem.model.Person;
 import org.jline.reader.LineReader;
+
 
 /**
  * Utility class for validating user input.
@@ -13,6 +16,7 @@ public class InputValidator {
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$"
     );
+
 
     /**
      * Reads a non-empty string from the console.
@@ -31,6 +35,7 @@ public class InputValidator {
         return input;
     }
 
+
     /**
      * Validates an email address.
      * @param email The email address to validate
@@ -39,6 +44,7 @@ public class InputValidator {
     public static boolean isValidEmail(String email) {
         return email != null && EMAIL_PATTERN.matcher(email).matches();
     }
+
 
     /**
      * Reads a string from the console.
@@ -49,6 +55,7 @@ public class InputValidator {
     public static String readString(LineReader reader, String prompt) {
         return reader.readLine(prompt).trim();
     }
+
 
     /**
      * Reads an integer from the console within a specified range.
@@ -74,6 +81,7 @@ public class InputValidator {
         }
     }
 
+
     /**
      * Reads a double from the console within a specified range.
      * @param reader The LineReader to use for input
@@ -98,6 +106,7 @@ public class InputValidator {
         }
     }
 
+
     /**
      * Reads a boolean from the console.
      * @param reader The LineReader to use for input
@@ -116,6 +125,7 @@ public class InputValidator {
             }
         }
     }
+
 
     /**
      * Checks if an email is already taken by any person in a list.

@@ -1,6 +1,8 @@
 package com.rentalsystem.model;
 
+
 import java.util.*;
+
 
 /**
  * Represents a host in the rental system.
@@ -10,6 +12,7 @@ public class Host extends Person {
     private final List<Property> managedProperties = new ArrayList<>();
     private final Set<Owner> cooperatingOwners = new HashSet<>();
     private final List<RentalAgreement> managedAgreements = new ArrayList<>();
+
 
     /**
      * Constructs a new Host.
@@ -22,6 +25,7 @@ public class Host extends Person {
         super(id, fullName, dateOfBirth, contactInformation);
     }
 
+
     /**
      * Retrieves a list of properties managed by this host.
      * @return A new ArrayList containing the managed properties
@@ -29,6 +33,7 @@ public class Host extends Person {
     public List<Property> getManagedProperties() {
         return new ArrayList<>(managedProperties);
     }
+
 
     /**
      * Adds a property to the list of properties managed by this host.
@@ -40,6 +45,7 @@ public class Host extends Person {
             property.addHost(this);
         }
     }
+
 
     /**
      * Removes a property from the list of properties managed by this host.
@@ -53,6 +59,7 @@ public class Host extends Person {
         }
     }
 
+
     /**
      * Adds a rental agreement to the list of agreements managed by this host.
      * @param agreement The rental agreement to be added
@@ -63,6 +70,7 @@ public class Host extends Person {
         }
     }
 
+
     /**
      * Removes a rental agreement from the list of agreements managed by this host.
      * @param agreement The rental agreement to be removed
@@ -70,6 +78,7 @@ public class Host extends Person {
     public void removeManagedAgreement(RentalAgreement agreement) {
         managedAgreements.remove(agreement);
     }
+
 
     /**
      * Retrieves a list of rental agreements managed by this host.
@@ -79,6 +88,7 @@ public class Host extends Person {
         return new ArrayList<>(managedAgreements);
     }
 
+
     /**
      * Retrieves a set of owners cooperating with this host.
      * @return A new HashSet containing the cooperating owners
@@ -86,6 +96,7 @@ public class Host extends Person {
     public Set<Owner> getCooperatingOwners() {
         return new HashSet<>(cooperatingOwners);
     }
+
 
     /**
      * Adds an owner to the set of cooperating owners.
@@ -96,6 +107,7 @@ public class Host extends Person {
         owner.addManagingHost(this);
     }
 
+
     /**
      * Removes an owner from the set of cooperating owners.
      * @param owner The owner to be removed
@@ -105,6 +117,7 @@ public class Host extends Person {
             owner.removeManagingHost(this);
         }
     }
+
 
     @Override
     public String toString() {

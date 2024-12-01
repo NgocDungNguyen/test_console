@@ -1,8 +1,10 @@
 package com.rentalsystem.config;
 
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
+
 
 /**
  * Configuration class for loading and accessing application settings.
@@ -10,6 +12,7 @@ import java.util.Properties;
 public class AppConfig {
     private static final String CONFIG_FILE = "resources/assets/config/settings.xml";
     private static Properties properties;
+
 
     // Static initializer to load properties from XML file
     static {
@@ -22,6 +25,7 @@ public class AppConfig {
         }
     }
 
+
     /**
      * Retrieves a property value as a String.
      * @param key The key of the property to retrieve
@@ -30,6 +34,7 @@ public class AppConfig {
     public static String getProperty(String key) {
         return properties.getProperty(key);
     }
+
 
     /**
      * Retrieves a property value as an integer.
@@ -40,6 +45,7 @@ public class AppConfig {
     public static int getIntProperty(String key) {
         return Integer.parseInt(properties.getProperty(key));
     }
+
 
     /**
      * Retrieves a property value as a boolean.

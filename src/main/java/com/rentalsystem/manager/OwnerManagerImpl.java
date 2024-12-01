@@ -1,5 +1,6 @@
 package com.rentalsystem.manager;
 
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,13 +9,22 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Comparator;
 
+
 import com.rentalsystem.model.Owner;
 import com.rentalsystem.model.Person;
 import com.rentalsystem.util.FileHandler;
 import com.rentalsystem.util.InputValidator;
 
+
+import com.rentalsystem.model.Property;
+import com.rentalsystem.model.Host;
+
+
+
+
 import static com.rentalsystem.util.FileHandler.DATE_FORMAT;
 import static com.rentalsystem.util.InputValidator.isEmailTaken;
+
 
 /**
  * Implementation of the OwnerManager interface.
@@ -23,22 +33,47 @@ import static com.rentalsystem.util.InputValidator.isEmailTaken;
 public class OwnerManagerImpl implements OwnerManager {
     private final Map<String, Owner> owners;
     private final FileHandler fileHandler;
+    private PropertyManager propertyManager;
+    private HostManager hostManager;
 
-    /**
-     * Constructs a new OwnerManagerImpl.
-     * @param fileHandler The FileHandler to use for data persistence
-     */
+
     public OwnerManagerImpl(FileHandler fileHandler) {
         this.fileHandler = fileHandler;
         this.owners = new HashMap<>();
     }
 
-    /**
-     * Loads owners from file into the system.
-     */
-    public void load() {
-        fileHandler.loadOwners();
+
+    public void setDependencies(PropertyManager propertyManager, HostManager hostManager) {
+        this.propertyManager = propertyManager;
+        this.hostManager = hostManager;
     }
+
+
+    @Override
+    public void load() {
+        if (propertyManager == null || hostManager == null) {
+            throw new IllegalStateException("Dependencies not set for OwnerManager");
+        }
+
+
+        for (String[] parts : fileHandler.readLines("owners.txt")) {
+            Owner owner = fromString(parts);
+            owners.put(owner.getId(), owner);
+        }
+
+
+        // After loading all owners, update their properties and hosts
+        for (Property property : propertyManager.getAll()) {
+            Owner owner = get(property.getOwner().getId());
+            if (owner != null) {
+                owner.addOwnedProperty(property);
+                for (Host host : property.getHosts()) {
+                    owner.addManagingHost(host);
+                }
+            }
+        }
+    }
+
 
     @Override
     public void add(Owner owner) {
@@ -49,7 +84,9 @@ public class OwnerManagerImpl implements OwnerManager {
             throw new IllegalArgumentException("Email already in use: " + owner.getContactInformation());
         }
         owners.put(owner.getId(), owner);
+        saveToFile();
     }
+
 
     @Override
     public void update(Owner owner) {
@@ -64,7 +101,9 @@ public class OwnerManagerImpl implements OwnerManager {
             throw new IllegalArgumentException("Email already in use: " + owner.getContactInformation());
         }
         owners.put(owner.getId(), owner);
+        saveToFile();
     }
+
 
     @Override
     public void delete(String ownerId) {
@@ -72,17 +111,21 @@ public class OwnerManagerImpl implements OwnerManager {
             throw new IllegalArgumentException("Owner with ID " + ownerId + " does not exist.");
         }
         owners.remove(ownerId);
+        saveToFile();
     }
+
 
     @Override
     public Owner get(String ownerId) {
         return owners.get(ownerId);
     }
 
+
     @Override
     public List<Owner> getAll() {
         return new ArrayList<>(owners.values());
     }
+
 
     @Override
     public List<Owner> getSorted(String sortBy) {
@@ -106,6 +149,7 @@ public class OwnerManagerImpl implements OwnerManager {
         return sortedList;
     }
 
+
     @Override
     public List<Owner> search(String keyword) {
         final String lowercaseKeyword = keyword.toLowerCase();
@@ -116,12 +160,14 @@ public class OwnerManagerImpl implements OwnerManager {
                 .collect(Collectors.toList());
     }
 
+
     @Override
     public void saveToFile() {
         List<String[]> lines = getSorted("id").stream()
-                .map(Person::toCSV).collect(Collectors.toList());
+                .map(Owner::toCSV).collect(Collectors.toList());
         fileHandler.saveOwners(lines);
     }
+
 
     @Override
     public Owner fromString(String[] parts) {

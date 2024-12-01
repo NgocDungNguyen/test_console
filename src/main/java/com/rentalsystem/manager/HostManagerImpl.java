@@ -1,5 +1,6 @@
 package com.rentalsystem.manager;
 
+
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,12 +9,21 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.Comparator;
 
+
 import com.rentalsystem.model.Host;
 import com.rentalsystem.model.Person;
 import com.rentalsystem.util.FileHandler;
 import com.rentalsystem.util.InputValidator;
+import com.rentalsystem.model.Owner;
+import com.rentalsystem.model.Property;
+
+
+
+
+
 
 import static com.rentalsystem.util.FileHandler.DATE_FORMAT;
+
 
 /**
  * Implementation of the HostManager interface.
@@ -22,22 +32,57 @@ import static com.rentalsystem.util.FileHandler.DATE_FORMAT;
 public class HostManagerImpl implements HostManager {
     private final Map<String, Host> hosts;
     private final FileHandler fileHandler;
+    private PropertyManager propertyManager;
+    private OwnerManager ownerManager;
 
-    /**
-     * Constructs a new HostManagerImpl.
-     * @param fileHandler The FileHandler to use for data persistence
-     */
+
     public HostManagerImpl(FileHandler fileHandler) {
         this.fileHandler = fileHandler;
         this.hosts = new HashMap<>();
     }
 
-    /**
-     * Loads hosts from file into the system.
-     */
-    public void load() {
-        fileHandler.loadHosts();
+
+    public void setDependencies(PropertyManager propertyManager, OwnerManager ownerManager) {
+        this.propertyManager = propertyManager;
+        this.ownerManager = ownerManager;
     }
+
+
+    @Override
+    public void load() {
+        if (propertyManager == null || ownerManager == null) {
+            throw new IllegalStateException("Dependencies not set for HostManager");
+        }
+
+
+        for (String[] parts : fileHandler.readLines("hosts.txt")) {
+            Host host = fromString(parts);
+            hosts.put(host.getId(), host);
+        }
+
+
+        // Load host-property relationships
+        for (String[] parts : fileHandler.readLines("properties_hosts.txt")) {
+            if (parts.length == 2) {
+                Property property = propertyManager.get(parts[0]);
+                Host host = get(parts[1]);
+                if (property != null && host != null) {
+                    host.addManagedProperty(property);
+                    property.addHost(host);
+
+
+                    // Update owner's managing hosts
+                    Owner owner = property.getOwner();
+                    if (owner != null) {
+                        owner.addManagingHost(host);
+                    }
+                }
+            }
+        }
+    }
+
+
+
 
     @Override
     public void add(Host host) {
@@ -48,7 +93,9 @@ public class HostManagerImpl implements HostManager {
             throw new IllegalArgumentException("Email already in use: " + host.getContactInformation());
         }
         hosts.put(host.getId(), host);
+        saveToFile();
     }
+
 
     @Override
     public void update(Host host) {
@@ -63,7 +110,9 @@ public class HostManagerImpl implements HostManager {
             throw new IllegalArgumentException("Email already in use: " + host.getContactInformation());
         }
         hosts.put(host.getId(), host);
+        saveToFile();
     }
+
 
     @Override
     public void delete(String hostId) {
@@ -71,7 +120,9 @@ public class HostManagerImpl implements HostManager {
             throw new IllegalArgumentException("Host with ID " + hostId + " does not exist.");
         }
         hosts.remove(hostId);
+        saveToFile();
     }
+
 
     @Override
     public Host get(String hostId) {
@@ -82,10 +133,12 @@ public class HostManagerImpl implements HostManager {
         return host;
     }
 
+
     @Override
     public List<Host> getAll() {
         return new ArrayList<>(hosts.values());
     }
+
 
     @Override
     public List<Host> getSorted(String sortBy) {
@@ -109,6 +162,7 @@ public class HostManagerImpl implements HostManager {
         return sortedList;
     }
 
+
     @Override
     public List<Host> search(String keyword) {
         final String lowercaseKeyword = keyword.toLowerCase();
@@ -119,11 +173,13 @@ public class HostManagerImpl implements HostManager {
                 .collect(Collectors.toList());
     }
 
+
     @Override
     public boolean isEmailTaken(String email) {
         return getAll().stream()
                 .anyMatch(host -> host.getContactInformation().equalsIgnoreCase(email));
     }
+
 
     @Override
     public void saveToFile() {
@@ -131,6 +187,7 @@ public class HostManagerImpl implements HostManager {
                 .map(Person::toCSV).collect(Collectors.toList());
         fileHandler.saveHosts(lines);
     }
+
 
     @Override
     public Host fromString(String[] parts) {

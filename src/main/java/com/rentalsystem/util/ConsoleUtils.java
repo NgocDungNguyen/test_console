@@ -1,12 +1,15 @@
 package com.rentalsystem.util;
 
+
 import java.util.Scanner;
+
 
 /**
  * Utility class for handling console input and output operations.
  */
 public class ConsoleUtils {
     private static final Scanner scanner = new Scanner(System.in);
+
 
     /**
      * Reads a string input from the console.
@@ -17,6 +20,7 @@ public class ConsoleUtils {
         System.out.print(prompt);
         return scanner.nextLine().trim();
     }
+
 
     /**
      * Reads an integer input from the console.
@@ -35,6 +39,7 @@ public class ConsoleUtils {
         }
     }
 
+
     /**
      * Reads a double input from the console.
      * Continues to prompt the user until a valid double is entered.
@@ -51,6 +56,7 @@ public class ConsoleUtils {
             }
         }
     }
+
 
     /**
      * Reads a boolean input from the console.
@@ -72,6 +78,7 @@ public class ConsoleUtils {
         }
     }
 
+
     /**
      * Clears the console screen.
      * Note: This may not work in all console environments.
@@ -80,6 +87,7 @@ public class ConsoleUtils {
         System.out.print("\033[H\033[2J");
         System.out.flush();
     }
+
 
     /**
      * Prompts the user to press Enter to continue.

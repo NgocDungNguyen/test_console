@@ -1,9 +1,11 @@
 package com.rentalsystem.util;
 
+
 import org.jline.reader.LineReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
 
 /**
  * Utility class for handling date-related operations.
@@ -11,9 +13,11 @@ import java.util.Date;
 public class DateUtil {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
+
     static {
         dateFormat.setLenient(false);  // Strict date parsing
     }
+
 
     /**
      * Parses a date string into a Date object.
@@ -28,6 +32,7 @@ public class DateUtil {
             return null;
         }
     }
+
 
     /**
      * Reads a date input from the console using a LineReader.
@@ -48,6 +53,7 @@ public class DateUtil {
         }
         return date;
     }
+
 
     /**
      * Reads an optional date input from the console using a LineReader.

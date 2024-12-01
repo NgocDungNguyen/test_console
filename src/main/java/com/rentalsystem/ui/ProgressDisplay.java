@@ -1,14 +1,17 @@
 package com.rentalsystem.ui;
 
+
 import org.jline.terminal.Terminal;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStyle;
+
 
 /**
  * A class to display progress bars in the console.
  */
 public class ProgressDisplay {
     private final Terminal terminal;
+
 
     /**
      * Constructs a ProgressDisplay with the given terminal.
@@ -17,6 +20,7 @@ public class ProgressDisplay {
     public ProgressDisplay(Terminal terminal) {
         this.terminal = terminal;
     }
+
 
     /**
      * Displays a progress bar with a message.
@@ -27,6 +31,7 @@ public class ProgressDisplay {
     public void showProgress(String message, int current, int total) {
         int width = 50; // Width of the progress bar
         int progress = (int) ((double) current / total * width);
+
 
         StringBuilder bar = new StringBuilder("[");
         for (int i = 0; i < width; i++) {
@@ -40,11 +45,14 @@ public class ProgressDisplay {
         }
         bar.append("]");
 
+
         String progressString = String.format("%s %s %d/%d", message, bar.toString(), current, total);
+
 
         // Print the progress bar
         terminal.writer().print("\r" + new AttributedString(progressString, AttributedStyle.DEFAULT).toAnsi(terminal));
         terminal.writer().flush();
+
 
         // Print a newline when progress is complete
         if (current == total) {

@@ -1,6 +1,8 @@
 package com.rentalsystem.model;
 
+
 import java.util.*;
+
 
 /**
  * Represents a rental agreement in the rental system.
@@ -19,6 +21,7 @@ public class RentalAgreement {
     private Status status;
     private List<Payment> payments;
 
+
     /**
      * Enum representing the possible rental periods.
      */
@@ -26,12 +29,14 @@ public class RentalAgreement {
         DAILY, WEEKLY, FORTNIGHTLY, MONTHLY
     }
 
+
     /**
      * Enum representing the possible statuses of a rental agreement.
      */
     public enum Status {
         NEW, ACTIVE, COMPLETED
     }
+
 
     /**
      * Checks if the rental agreement is currently active.
@@ -41,6 +46,14 @@ public class RentalAgreement {
         Date currentDate = new Date();
         return currentDate.after(startDate) && currentDate.before(endDate) && status == Status.ACTIVE;
     }
+
+
+    public void setEndDate(Date endDate) {
+        this.endDate = endDate;
+    }
+
+
+
 
     /**
      * Constructs a new RentalAgreement.
@@ -69,6 +82,8 @@ public class RentalAgreement {
         this.status = Status.NEW;
         this.payments = new ArrayList<>();
 
+
+        // Add main tenant and rental agreement links
         property.addTenant(mainTenant);
         property.addRentalAgreement(this);
         mainTenant.addRentalAgreement(this);
@@ -76,8 +91,8 @@ public class RentalAgreement {
         owner.addRentalAgreement(this);
     }
 
-    // Getters and setters
 
+    // Getters and setters
     public String getAgreementId() { return agreementId; }
     public Property getProperty() { return property; }
     public Tenant getMainTenant() { return mainTenant; }
@@ -85,7 +100,6 @@ public class RentalAgreement {
     public Host getHost() { return host; }
     public Date getStartDate() { return startDate; }
     public Date getEndDate() { return endDate; }
-    public void setEndDate(Date endDate) { this.endDate = endDate; }
     public double getRentAmount() { return rentAmount; }
     public void setRentAmount(double rentAmount) { this.rentAmount = rentAmount; }
     public RentalPeriod getRentalPeriod() { return rentalPeriod; }
@@ -93,11 +107,13 @@ public class RentalAgreement {
     public void setStatus(Status status) { this.status = status; }
     public List<Tenant> getSubTenants() { return new ArrayList<>(subTenants); }
 
+
     /**
      * Sets the property for this rental agreement and updates related entities.
      * @param newProperty The new property for this agreement
      */
     public void setProperty(Property newProperty) {
+        // Remove the tenants from the old property
         if (this.property != null) {
             this.property.removeTenant(mainTenant);
             for (Tenant subTenant : subTenants) {
@@ -105,6 +121,7 @@ public class RentalAgreement {
             }
         }
         this.property = newProperty;
+        // Add the tenants to the new property
         if (newProperty != null) {
             newProperty.addTenant(mainTenant);
             for (Tenant subTenant : subTenants) {
@@ -113,20 +130,27 @@ public class RentalAgreement {
         }
     }
 
+
     /**
      * Adds a sub-tenant to the rental agreement.
      * @param subTenant The sub-tenant to be added
      */
     public void addSubTenant(Tenant subTenant) {
         if (mainTenant == subTenant) {
-            System.out.println("Main tenant is sub tenant, skip");
+            System.out.println("Main tenant cannot be added as a sub-tenant.");
+            return;
         }
         if (!subTenants.contains(subTenant)) {
             subTenants.add(subTenant);
             subTenant.addRentalAgreement(this);
             property.addTenant(subTenant);
+        } else {
+            System.out.println("Sub-tenant already added to this agreement.");
         }
     }
+
+
+
 
     /**
      * Removes a sub-tenant from the rental agreement.
@@ -143,6 +167,9 @@ public class RentalAgreement {
         });
     }
 
+
+
+
     /**
      * Adds a payment to the rental agreement.
      * @param payment The payment to be added
@@ -150,6 +177,7 @@ public class RentalAgreement {
     public void addPayment(Payment payment) {
         payments.add(payment);
     }
+
 
     /**
      * Retrieves the list of payments for this rental agreement.
@@ -159,6 +187,7 @@ public class RentalAgreement {
         return new ArrayList<>(payments);
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -167,10 +196,12 @@ public class RentalAgreement {
         return Objects.equals(agreementId, that.agreementId);
     }
 
+
     @Override
     public int hashCode() {
         return Objects.hash(agreementId);
     }
+
 
     @Override
     public String toString() {

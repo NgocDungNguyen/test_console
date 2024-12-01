@@ -1,6 +1,8 @@
 package com.rentalsystem.manager;
 
+
 import java.util.List;
+
 
 /**
  * Generic interface for CRUD (Create, Read, Update, Delete) operations.
@@ -13,17 +15,20 @@ public interface CrudManager<T> {
      */
     void add(T object);
 
+
     /**
      * Updates an existing object in the system.
      * @param object The object to be updated
      */
     void update(T object);
 
+
     /**
      * Deletes an object from the system based on its ID.
      * @param id The ID of the object to be deleted
      */
     void delete(String id);
+
 
     /**
      * Retrieves an object from the system based on its ID.
@@ -32,11 +37,13 @@ public interface CrudManager<T> {
      */
     T get(String id);
 
+
     /**
      * Retrieves all objects of this type from the system.
      * @return A list of all objects
      */
     List<T> getAll();
+
 
     /**
      * Retrieves a sorted list of all objects based on a specified criteria.
@@ -45,10 +52,12 @@ public interface CrudManager<T> {
      */
     List<T> getSorted(String sortBy);
 
+
     /**
      * Saves the current state of objects to a file.
      */
     void saveToFile();
+
 
     /**
      * Creates an object from a string array representation.
@@ -56,6 +65,7 @@ public interface CrudManager<T> {
      * @return The created object
      */
     T fromString(String[] parts);
+
 
     /**
      * Loads objects from a file into the system.

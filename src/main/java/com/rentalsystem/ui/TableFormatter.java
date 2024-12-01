@@ -1,20 +1,24 @@
 package com.rentalsystem.ui;
 
+
 import com.rentalsystem.model.*;
 import org.jline.terminal.Terminal;
 import org.jline.utils.AttributedString;
 import org.jline.utils.AttributedStyle;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 /**
  * A class to format and print tables in the console.
  */
 public class TableFormatter {
     private final Terminal terminal;
+
 
     // ANSI color codes for console output
     public static final String ANSI_RESET = "\u001B[0m";
@@ -25,6 +29,7 @@ public class TableFormatter {
     public static final String ANSI_PURPLE = "\u001B[35m";
     public static final String ANSI_CYAN = "\u001B[36m";
 
+
     /**
      * Constructs a TableFormatter with the given terminal.
      * @param terminal The terminal to use for output
@@ -32,6 +37,7 @@ public class TableFormatter {
     public TableFormatter(Terminal terminal) {
         this.terminal = terminal;
     }
+
 
     /**
      * Prints a table with a title and options.
@@ -45,16 +51,20 @@ public class TableFormatter {
                 options.stream().mapToInt(String::length).max().orElse(0)
         ) + 6; // Increased padding
 
+
         printBorder('╔', '╗', '═', maxWidth);
         printCenteredText(title, maxWidth);
         printBorder('╠', '╣', '═', maxWidth);
+
 
         for (int i = 0; i < options.size(); i++) {
             printText((i + 1) + ". " + options.get(i), maxWidth);
         }
 
+
         printBorder('╚', '╝', '═', maxWidth);
     }
+
 
     /**
      * Prints a single line of text in the table.
@@ -70,6 +80,7 @@ public class TableFormatter {
         System.out.println("║ " + text + " ".repeat(padding) + "║");
     }
 
+
     /**
      * Prints a data table with headers and rows.
      * @param headers The headers of the table
@@ -79,15 +90,18 @@ public class TableFormatter {
     public void printDataTable(List<String> headers, List<List<String>> rows, String color) {
         List<Integer> columnWidths = getColumnWidths(headers, rows);
 
+
         printDataBorder('┌', '┐', '─', '┬', columnWidths);
         printDataRow(headers, columnWidths, true);
         printDataBorder('├', '┤', '─', '┼', columnWidths);
+
 
         for (List<String> row : rows) {
             printDataRow(row, columnWidths, false);
         }
         printDataBorder('└', '┘', '─', '┴', columnWidths);
     }
+
 
     /**
      * Prints a border for the table.
@@ -100,6 +114,7 @@ public class TableFormatter {
         System.out.println(left + String.valueOf(fill).repeat(width - 2) + right);
     }
 
+
     /**
      * Prints centered text in the table.
      * @param text The text to center
@@ -109,6 +124,7 @@ public class TableFormatter {
         int padding = (width - text.length()) / 2;
         System.out.println("║" + " ".repeat(padding) + text + " ".repeat(width - text.length() - padding - 2) + "║");
     }
+
 
     /**
      * Prints a border for the data table.
@@ -129,6 +145,7 @@ public class TableFormatter {
         System.out.println(right);
     }
 
+
     /**
      * Prints a row of the data table.
      * @param cells The cells of the row
@@ -146,6 +163,7 @@ public class TableFormatter {
         }
         System.out.println("│");
     }
+
 
     /**
      * Calculates the widths of each column in the table.
@@ -165,6 +183,7 @@ public class TableFormatter {
         return widths;
     }
 
+
     /**
      * Prints a status bar with current user, date, and time.
      * @param currentUser The current user
@@ -177,6 +196,7 @@ public class TableFormatter {
         printDataTable(headers, data, ANSI_YELLOW);
     }
 
+
     /**
      * Prints a table of owners.
      * @param owners The list of owners to display
@@ -184,6 +204,7 @@ public class TableFormatter {
     public void printOwnerTable(List<Owner> owners) {
         List<String> headers = Arrays.asList("ID", "Name", "Date of Birth", "Contact Info");
         List<List<String>> rows = new ArrayList<>();
+
 
         for (Owner owner : owners) {
             rows.add(Arrays.asList(
@@ -194,8 +215,10 @@ public class TableFormatter {
             ));
         }
 
+
         printDataTable(headers, rows, ANSI_CYAN);
     }
+
 
     /**
      * Prints a table of hosts.
@@ -204,6 +227,7 @@ public class TableFormatter {
     public void printHostTable(List<Host> hosts) {
         List<String> headers = Arrays.asList("ID", "Name", "Date of Birth", "Contact Info");
         List<List<String>> rows = new ArrayList<>();
+
 
         for (Host host : hosts) {
             rows.add(Arrays.asList(
@@ -214,8 +238,10 @@ public class TableFormatter {
             ));
         }
 
+
         printDataTable(headers, rows, ANSI_CYAN);
     }
+
 
     /**
      * Prints a table of properties.
@@ -231,6 +257,7 @@ public class TableFormatter {
                     .map(t -> t.getId() + " - " + t.getFullName())
                     .collect(Collectors.joining(", "));
 
+
             data.add(Arrays.asList(
                     property.getPropertyId(),
                     property instanceof ResidentialProperty ? "Residential" : "Commercial",
@@ -244,6 +271,7 @@ public class TableFormatter {
         printDataTable(headers, data, ANSI_CYAN);
     }
 
+
     /**
      * Prints a table of rental agreements.
      * @param agreements The list of rental agreements to display
@@ -251,6 +279,7 @@ public class TableFormatter {
     public void printRentalAgreementTable(List<RentalAgreement> agreements) {
         List<String> headers = Arrays.asList("ID", "Property", "Tenant", "Start Date", "End Date", "Rent Amount", "Status");
         List<List<String>> rows = new ArrayList<>();
+
 
         for (RentalAgreement agreement : agreements) {
             rows.add(Arrays.asList(
@@ -263,6 +292,7 @@ public class TableFormatter {
                     agreement.getStatus().toString()
             ));
         }
+
 
         printDataTable(headers, rows, ANSI_CYAN);
     }

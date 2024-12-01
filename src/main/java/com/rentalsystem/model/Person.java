@@ -1,8 +1,10 @@
 package com.rentalsystem.model;
 
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
+
 
 /**
  * Abstract base class for all person-related entities in the rental system.
@@ -12,6 +14,7 @@ public abstract class Person implements Comparable<Person> {
     private String fullName;
     private Date dateOfBirth;
     private String contactInformation;
+
 
     /**
      * Constructs a new Person.
@@ -27,39 +30,49 @@ public abstract class Person implements Comparable<Person> {
         this.contactInformation = contactInformation;
     }
 
+
     // Getters and setters
+
 
     public String getId() {
         return id;
     }
 
+
     public void setId(String id) {
         this.id = id;
     }
+
 
     public String getFullName() {
         return fullName;
     }
 
+
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
+
 
     public String getDateOfBirth() {
         return new SimpleDateFormat("yyyy-MM-dd").format(dateOfBirth);
     }
 
+
     public void setDateOfBirth(Date dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
     }
+
 
     public String getContactInformation() {
         return contactInformation;
     }
 
+
     public void setContactInformation(String contactInformation) {
         this.contactInformation = contactInformation;
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -69,10 +82,12 @@ public abstract class Person implements Comparable<Person> {
         return Objects.equals(id, person.id);
     }
 
+
     @Override
     public int hashCode() {
         return Objects.hash(id);
     }
+
 
     @Override
     public String toString() {
@@ -84,6 +99,7 @@ public abstract class Person implements Comparable<Person> {
                 '}';
     }
 
+
     /**
      * Abstract method to add a managed agreement.
      * To be implemented by subclasses.
@@ -91,10 +107,12 @@ public abstract class Person implements Comparable<Person> {
      */
     public abstract void addManagedAgreement(RentalAgreement agreement);
 
+
     @Override
     public int compareTo(Person o) {
         return this.getId().compareTo(o.getId());
     }
+
 
     /**
      * Converts the person's information to a CSV format.
