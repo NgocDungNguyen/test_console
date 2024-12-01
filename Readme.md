@@ -1,174 +1,165 @@
-# 🏠 Rental Management System
+# 🏢 Rental Property Management System
 
-![Rental Management System Banner](https://via.placeholder.com/1200x300?text=Rental+Management+System)
+![Rental Management System Banner](https://via.placeholder.com/1200x300?text=Rental+Property+Management+System)
 
 [![Java Version](https://img.shields.io/badge/Java-17%2B-blue.svg)](https://www.oracle.com/java/technologies/javase/jdk17-archive-downloads.html)
 [![Maven](https://img.shields.io/badge/Maven-3.6.0%2B-orange.svg)](https://maven.apache.org/download.cgi)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> A comprehensive solution for managing rental properties, tenants, and agreements with ease and efficiency.
+## 📋 Overview
 
-## 📚 Table of Contents
+The Rental Property Management System is a robust, Java-based application designed to streamline the complexities of property management. It offers a comprehensive solution for managing rental properties, tenants, owners, and rental agreements, with a focus on data integrity and efficient operations.
 
-- [🌟 Features](#-features)
-- [🛠️ Prerequisites](#️-prerequisites)
-- [🚀 Quick Start](#-quick-start)
-- [💻 Running the Application](#-running-the-application)
-- [🏗️ Project Structure](#️-project-structure)
-- [📊 Data Management](#-data-management)
-- [🧪 Testing](#-testing)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
-- [📞 Support](#-support)
+## 🌟 Key Features
 
-## 🌟 Features
+- 🏘️ **Multi-entity Management**: Seamlessly handle Properties, Tenants, Owners, Hosts, and Rental Agreements.
+- 🏠🏢 **Flexible Property Types**: Support for both Residential and Commercial properties with type-specific attributes.
+- 📄 **Advanced Rental Agreement Handling**: Manage complex scenarios including multi-tenant agreements and subletting.
+- 💰 **Financial Tracking**: Integrated payment system with support for various payment methods and detailed transaction logging.
+- 📊 **Reporting and Analytics**: Generate insightful reports on occupancy rates, financial performance, and more.
+- 💾 **Data Persistence**: Efficient file-based data storage with automatic data synchronization.
 
-Our Rental Management System offers a robust set of features to streamline your property management tasks:
+## 🔧 Technical Specifications
 
-- 🏘️ **Property Management**: Handle both residential and commercial properties
-- 👥 **Tenant & Owner Tracking**: Maintain detailed records of tenants and property owners
-- 📝 **Agreement Handling**: Create, update, and manage rental agreements effortlessly
-- 💰 **Financial Oversight**: Track payments and generate comprehensive financial reports
-- 📊 **Occupancy Analysis**: Get insights into property occupancy rates
-- 📈 **Reporting Suite**: Generate various reports including income, tenant status, and property analytics
+### 🏗️ Architecture
 
-## 🛠️ Prerequisites
+The system follows a layered architecture to ensure separation of concerns:
 
-Before diving in, make sure you have the following tools installed:
+1. 🖥️ **Presentation Layer**: Console-based UI (`ConsoleUI` class)
+2. 🧠 **Business Logic Layer**: Manager classes (e.g., `PropertyManager`, `TenantManager`)
+3. 💽 **Data Access Layer**: `FileHandler` for data persistence
+4. 🏛️ **Model Layer**: Entity classes representing core domain objects
 
-- ☕ Java Development Kit (JDK) 17 or later
-- 🔧 Maven 3.6.0 or later
-- 🐙 Git (for version control and cloning the repository)
+### 🎨 Design Patterns
 
-## 🚀 Quick Start
+- 🔒 **Singleton**: Utilized for manager classes to ensure a single point of access for each entity type.
+- 🔀 **Strategy**: Implemented in the sorting mechanisms for flexible and extensible sorting options.
+- 👀 **Observer**: Used for real-time updates between interconnected entities (e.g., Property and RentalAgreement).
 
-Get up and running with these simple steps:
+### 📊 Data Model
 
-1. **Clone the repository**
-   ```bash
+The system's core entities and their relationships:
+
+- 🏠 `Property` (abstract base class)
+   - 🏡 `ResidentialProperty`
+   - 🏢 `CommercialProperty`
+- 👤 `Person` (abstract base class)
+   - 🧑‍🤝‍🧑 `Tenant`
+   - 👨‍💼 `Owner`
+   - 🧑‍🔧 `Host`
+- 📜 `RentalAgreement`
+- 💳 `Payment`
+
+### 💾 Data Persistence
+
+Data is persisted using a custom CSV-like format, with each entity type having its dedicated file:
+
+- 🏠 `properties.txt`: Property data
+- 🧑‍🤝‍🧑 `tenants.txt`: Tenant information
+- 👨‍💼 `owners.txt`: Owner details
+- 🧑‍🔧 `hosts.txt`: Host records
+- 📜 `rental_agreements.txt`: Rental agreement data
+- 💳 `payments.txt`: Payment transaction logs
+
+## 🚀 Getting Started
+
+### 📋 Prerequisites
+
+- ☕ JDK 17 or later
+- 🛠️ Maven 3.6.0 or later
+- 🐙 Git (for version control)
+
+### 🔧 Installation
+
+1. Clone the repository:
+   ```
    git clone https://github.com/NgocDungNguyen/test.git
    cd test
    ```
 
-2. **Build the project**
-   ```bash
+2. Build the project:
+   ```
    mvn clean install
    ```
 
-## 💻 Running the Application
+### 🏃‍♂️ Running the Application
 
-### 🧠 IntelliJ IDEA
+Execute the main class `com.rentalsystem.ui.ConsoleUI`:
 
-1. Open IntelliJ IDEA
-2. Select `File` > `Open` and navigate to the project directory
-3. Wait for IntelliJ to import the project and resolve dependencies
-4. Locate `src/main/java/com/rentalsystem/ui/ConsoleUI.java`
-5. Right-click on the `ConsoleUI` class and select "Run 'ConsoleUI.main()'"
+```
+java -cp target/rental-property-management-system-1.0-SNAPSHOT.jar com.rentalsystem.ui.ConsoleUI
+```
 
-### 🖥️ Visual Studio Code
+## 👨‍💻 Development
 
-1. Launch Visual Studio Code
-2. Choose `File` > `Open Folder` and select the project directory
-3. Install the "Extension Pack for Java" if not already installed
-4. Open the Command Palette (Ctrl+Shift+P or Cmd+Shift+P on macOS)
-5. Type "Java: Configure Java Runtime" and select it
-6. Choose JDK 17 or later
-7. Navigate to `src/main/java/com/rentalsystem/ui/ConsoleUI.java`
-8. Click the "Run" button above the `main` method or use the F5 shortcut
-
-## 🏗️ Project Structure
-
-Our project is organized for clarity and maintainability:
+### 📁 Project Structure
 
 ```
 src/
 ├── main/
 │   ├── java/com/rentalsystem/
-│   │   ├── config/       # Configuration classes
-│   │   ├── manager/      # Business logic layer
-│   │   ├── model/        # Entity classes
+│   │   ├── config/       # Application configuration
+│   │   ├── manager/      # Business logic and entity management
+│   │   ├── model/        # Domain model classes
 │   │   ├── ui/           # User interface components
 │   │   └── util/         # Utility classes and helpers
 │   └── resources/
 │       └── data/         # Sample data files
 └── test/
+    ├── java/com/rentalsystem/  # Unit and integration tests
     └── resources/
-        └── test-data/    # Test data files
-            ├── test_hosts.txt
-            ├── test_properties.txt
-            └── test_rental_agreements.txt
+        └── test-data/    # Test-specific data files
 ```
 
-## 📊 Data Management
+### 📏 Coding Standards
 
-The system uses the following data files located in `src/main/resources/data/`:
+- Follow Java Code Conventions
+- Use meaningful variable and method names
+- Write comprehensive JavaDoc comments for public methods and classes
+- Maintain a clear separation of concerns between layers
 
-### Core Data Files
+### 🧪 Testing
 
-| File Name | Description |
-|-----------|-------------|
-| `hosts.txt` | Host information |
-| `tenants.txt` | Tenant details |
-| `owners.txt` | Property owner records |
-| `properties.txt` | Property listings |
-| `rental_agreements.txt` | Rental agreement data |
-| `payments.txt` | Payment transaction records |
+The project includes JUnit tests for core functionalities. Run tests using:
 
-### Additional Relationship Files
-
-| File Name | Description | Purpose |
-|-----------|-------------|---------|
-| `properties_hosts.txt` | Property-Host associations | Allows for many-to-many relationships between properties and hosts |
-| `properties_tenants.txt` | Property-Tenant relationships | Represents current occupancy of properties |
-| `rental_agreements_tenants.txt` | Agreement-Tenant links | Allows for multiple tenants per agreement (e.g., roommates) |
-
-### Why These Additional Files?
-
-1. **Data Normalization**: Reduces data redundancy and improves data integrity.
-2. **Flexibility**: Allows for complex relationships without complicating main entity structures.
-3. **Performance**: Enables faster lookups for specific relationships in large datasets.
-4. **Easier Updates**: Simplifies the process of updating specific relationships.
-
-Note: The necessity of these additional files depends on the specific requirements, data scale, and complexity of your system. For simpler implementations, the core files may be sufficient.
-
-## 🧪 Testing
-
-Our project includes a set of unit tests to ensure the reliability and correctness of core functionalities. The test data files are located in `src/test/resources/test-data/`.
-
-To run the tests, use the following Maven command:
-
-```bash
+```
 mvn test
 ```
 
-This will execute all unit tests and provide a report on the test results.
+## 🚀 Performance Considerations
+
+- 🐌 Lazy loading of related entities to minimize memory usage
+- 🔍 Indexed collections for faster entity lookups
+- 📦 Batch processing for file I/O operations to reduce disk access
+
+## 🔒 Security Measures
+
+- 🛡️ Input validation to prevent injection attacks
+- 🔐 Encryption of sensitive data in storage (e.g., payment information)
+- 🔑 Role-based access control for different user types (Admin, Host, Tenant)
+
+## 🔮 Future Enhancements
+
+- 💳 Integration with external payment gateways
+- 🌐 Implementation of a web-based interface
+- 🔔 Real-time notifications system for important events (e.g., upcoming rent due dates)
+- 📈 Data analytics dashboard for property performance metrics
 
 ## 🤝 Contributing
 
-We welcome contributions to the Rental Management System! Here's how you can help:
-
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/AmazingFeature`
-3. Commit your changes: `git commit -m 'Add some AmazingFeature'`
-4. Push to the branch: `git push origin feature/AmazingFeature`
-5. Open a pull request
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+We welcome contributions to the Rental Property Management System. Please refer to our [Contribution Guidelines](CONTRIBUTING.md) for detailed information on how to submit pull requests, report issues, and suggest improvements.
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for full details.
 
-## 📞 Support
+## 📞 Support and Contact
 
-Encountering issues or have questions? We're here to help!
+For technical support or inquiries:
 
-- 📧 Email: s3978535@rmit.edu.vn
-- 💬 Chat: [Join our Discord community](https://discord.gg/rentalmanagementsystem)
-- 🐦 Twitter: [@RentalManSys](https://twitter.com/RentalManSys)
+- 📧 Email: support@rentalmanagementsystem.com
+- 🐛 Issue Tracker: [GitHub Issues](https://github.com/NgocDungNguyen/test/issues)
 
 ---
 
-<p align="center">
-  Made with ❤️ by the Rental Management System Team
-</p>
+© 2024 Rental Property Management System. All rights reserved.
